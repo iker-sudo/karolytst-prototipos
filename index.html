@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#EFE8D8">
+<title>KarolyTST · Prototipos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--crema:#FDFBF7;--crema-2:#F5F0E6;--mesa:#EFE8D8;--grafito:#2B2B2B;--gris:#6B655B;--oro:#C5A059;--oro-osc:#8A6B2A;--linea:#E4DCCB;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Jost","Helvetica Neue",Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--crema);color:var(--grafito);font-family:var(--sans);font-weight:300;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3,p{margin:0}
+.wrap{width:min(1180px,100% - 32px);margin-inline:auto}
+header.top{position:sticky;top:0;z-index:50;background:rgba(253,251,247,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--linea)}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:62px}
+.logo{font:600 1.5rem var(--serif);text-decoration:none;letter-spacing:.02em}.logo span{color:var(--oro-osc)}
+header nav{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+header nav a{text-decoration:none;font-size:.88rem;font-weight:400;padding:0 .9rem;min-height:44px;display:inline-flex;align-items:center;border-radius:99px;color:var(--gris);transition:background .3s,color .3s}
+header nav a:hover{background:var(--mesa);color:var(--grafito)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:0 1.5rem;border-radius:2px;border:1px solid var(--oro);background:var(--oro);color:#1d1a14;font:500 .95rem var(--sans);letter-spacing:.03em;text-decoration:none;cursor:pointer;transition:background .3s,transform .3s}
+.btn:hover{background:#b8913f;transform:translateY(-2px)}
+.btn.ghost{background:transparent;color:var(--grafito);border-color:var(--oro-osc)}
+.btn.ghost:hover{background:var(--oro-osc);color:var(--crema)}
+.eyebrow{font-size:.76rem;letter-spacing:.24em;text-transform:uppercase;color:var(--oro-osc);font-weight:500;display:block;margin-bottom:.9rem}
+h1{font:500 clamp(2.4rem,5.6vw,4.2rem)/1.05 var(--serif);text-wrap:balance}
+h1 em,h2 em{font-style:italic;color:var(--oro-osc)}
+h2{font:500 clamp(1.9rem,3.6vw,2.8rem)/1.08 var(--serif);text-wrap:balance}
+section{padding:clamp(48px,7vw,88px) 0}
+.alt{background:var(--crema-2)}
+.hero p.lead{max-width:36em;color:var(--gris);margin-top:1.1rem;font-size:1.08rem}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:1.6rem}
+
+/* tarjetas de prototipos */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,3vw,32px);margin-top:2rem}
+.card{background:var(--crema);border:1px solid var(--linea);display:flex;flex-direction:column;box-shadow:0 30px 50px -40px rgba(60,40,10,.55)}
+.card .th{display:block;aspect-ratio:16/10;overflow:hidden;background:var(--mesa);position:relative}
+.card .th img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+.card:hover .th img{transform:scale(1.035)}
+.card .bd{padding:clamp(18px,2.6vw,28px);display:flex;flex-direction:column;gap:.7rem;flex:1}
+.card h3{font:500 1.7rem/1.1 var(--serif)}
+.card p{color:var(--gris);font-size:.98rem}
+.card .tags{display:flex;gap:6px;flex-wrap:wrap}
+.card .tags span{font-size:.72rem;letter-spacing:.06em;border:1px solid var(--linea);border-radius:99px;padding:.15rem .7rem;color:var(--gris)}
+.card .act{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:.6rem}
+
+/* visor */
+.viewer{margin-top:2rem}
+.vbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.seg{display:inline-flex;border:1px solid var(--linea);border-radius:99px;background:var(--crema);padding:4px;gap:2px}
+.seg button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 1.1rem;border-radius:99px;font:400 .9rem var(--sans);color:var(--gris);display:inline-flex;align-items:center;transition:background .3s,color .3s}
+.seg button:hover{color:var(--grafito)}
+.seg button[aria-pressed="true"]{background:var(--grafito);color:var(--crema)}
+.seg button:focus-visible{outline:2px solid var(--grafito);outline-offset:2px}
+.vstage{background:radial-gradient(ellipse at 50% 40%,#F6F1E4,var(--mesa) 75%);border:1px solid var(--linea);padding:clamp(14px,3vw,34px) 12px;display:flex;justify-content:center;overflow:hidden}
+.vfit{position:relative}
+.vframe{position:absolute;left:0;top:0;transform-origin:0 0;background:#111;border-radius:18px;padding:10px;box-shadow:0 40px 60px -34px rgba(40,28,8,.7)}
+.vframe iframe{display:block;width:100%;height:100%;border:0;border-radius:9px;background:var(--crema)}
+.vframe.desk{border-radius:10px;padding:8px 8px 8px}
+.vhelp{margin-top:.8rem;font-size:.86rem;color:var(--gris)}
+
+/* medios */
+.media{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:clamp(20px,4vw,56px);align-items:start;margin-top:2rem}
+.reel video{width:100%;aspect-ratio:9/16;background:#111;border-radius:14px;display:block;box-shadow:0 30px 50px -34px rgba(0,0,0,.6)}
+.reel p{margin-top:.8rem;font-size:.92rem;color:var(--gris)}
+.car{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.car a{display:block;aspect-ratio:4/5;overflow:hidden;border:1px solid var(--linea);background:var(--mesa)}
+.car img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}
+.car a:hover img{transform:scale(1.05)}
+.mh{font:500 1.5rem/1.1 var(--serif);margin-bottom:.4rem}
+.mp{color:var(--gris);font-size:.96rem;margin-bottom:1rem;max-width:36em}
+.todo{list-style:none;margin:1.6rem 0 0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:0 36px}
+.todo li{display:flex;gap:12px;padding:.85rem 0;border-bottom:1px solid var(--linea);font-size:.98rem}
+.todo li::before{content:"";flex:none;width:.55rem;height:.55rem;margin-top:.55rem;border:1px solid var(--oro);transform:rotate(45deg)}
+footer{padding:36px 0 52px;font-size:.82rem;color:var(--gris);border-top:1px solid var(--linea)}
+@media (max-width:860px){
+  .cards{grid-template-columns:1fr}
+  .media{grid-template-columns:1fr}
+  .reel{max-width:300px}
+  .car{grid-template-columns:repeat(4,1fr)}
+  .todo{grid-template-columns:1fr}
+  header nav a{padding:0 .6rem}
+}
+@media (max-width:640px){header.top .wrap{min-height:56px}header nav a:nth-child(n+3){display:none}header nav a{font-size:.85rem}}
+@media (max-width:520px){.car{grid-template-columns:repeat(2,1fr)}.seg button{padding:0 .85rem}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card .th img,.car img{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#inicio" aria-label="KarolyTST, inicio">Karoly<span>TST</span></a>
+  <nav aria-label="Secciones"><a href="#prototipos">Prototipos</a><a href="#vista">Vista previa</a><a href="#instagram">Instagram</a><a href="#pendiente">Pendiente</a></nav>
+</div></header>
+
+<main id="inicio">
+<section class="hero"><div class="wrap">
+  <span class="eyebrow">Prototipos para revisar</span>
+  <h1>Todo el proyecto de Karol, <em>a mano</em></h1>
+  <p class="lead">Dos propuestas de web para el libro «Salir del modo supervivencia», con tienda y compra simulada, y el primer material de Instagram. Se abre en el móvil, la tablet y el ordenador, sin iniciar sesión.</p>
+  <div class="hero cta"><a class="btn" href="#vista">Ver vista previa</a><a class="btn ghost" href="#prototipos">Elegir prototipo</a></div>
+</div></section>
+
+<section class="alt" id="prototipos"><div class="wrap">
+  <span class="eyebrow">Las dos webs</span>
+  <h2>Elige cómo quieres <em>recorrerlas</em></h2>
+  <div class="cards">
+    <article class="card">
+      <a class="th" href="libro/" aria-label="Abrir la web como libro"><img src="media/thumb-libro.jpg" alt="Captura de la web como libro abierto con el texto del método" width="1280" height="800" loading="lazy"></a>
+      <div class="bd">
+        <h3>Prototipo 2 · La web como libro</h3>
+        <p>La página entera es un libro: el scroll pasa las hojas, con doble página en pantallas anchas y una página en móvil. Incluye reseñas con carrusel y la tienda con el libro en 3D.</p>
+        <div class="tags"><span>Scroll que pasa páginas</span><span>Reseñas</span><span>Tienda y pago simulado</span></div>
+        <div class="act"><button class="btn" type="button" data-open="libro">Vista previa</button><a class="btn ghost" href="libro/">Abrir en pestaña nueva</a></div>
+      </div>
+    </article>
+    <article class="card">
+      <a class="th" href="web/" aria-label="Abrir la web larga"><img src="media/thumb-web.jpg" alt="Captura de la web larga con el título y la rama dorada" width="1280" height="800" loading="lazy"></a>
+      <div class="bd">
+        <h3>Prototipo 1 · Web larga</h3>
+        <p>Una página editorial con animaciones al hacer scroll: espejo, método, kit, ruta de 21 días, garantía, reseñas con carrusel y la tienda con el libro en 3D.</p>
+        <div class="tags"><span>Animaciones de scroll</span><span>Reseñas</span><span>Tienda y pago simulado</span></div>
+        <div class="act"><button class="btn" type="button" data-open="web">Vista previa</button><a class="btn ghost" href="web/">Abrir en pestaña nueva</a></div>
+      </div>
+    </article>
+  </div>
+</div></section>
+
+<section id="vista"><div class="wrap">
+  <span class="eyebrow">Vista previa</span>
+  <h2>Pruébalas en el tamaño <em>que quieras</em></h2>
+  <div class="viewer">
+    <div class="vbar">
+      <div class="seg" role="group" aria-label="Prototipo"><button type="button" data-proto="libro" aria-pressed="true">Libro</button><button type="button" data-proto="web" aria-pressed="false">Web larga</button></div>
+      <div class="seg" role="group" aria-label="Tamaño de pantalla"><button type="button" data-dev="mobile" aria-pressed="true">Móvil</button><button type="button" data-dev="tablet" aria-pressed="false">Tablet</button><button type="button" data-dev="desktop" aria-pressed="false">Ordenador</button></div>
+      <a class="btn ghost" id="vopen" href="libro/">Abrir a pantalla completa</a>
+    </div>
+    <div class="vstage" id="vstage"><div class="vfit" id="vfit"><div class="vframe" id="vframe"><iframe id="vif" title="Vista previa del prototipo" src="libro/" loading="lazy"></iframe></div></div></div>
+    <p class="vhelp">Es la web real dentro de un marco: puedes hacer scroll, pulsar y probar la compra. Con el libro, desliza hacia abajo para pasar las páginas.</p>
+  </div>
+</div></section>
+
+<section class="alt" id="instagram"><div class="wrap">
+  <span class="eyebrow">Instagram</span>
+  <h2>Primer reel y primer <em>carrusel</em></h2>
+  <div class="media">
+    <div class="reel">
+      <video controls playsinline preload="metadata" poster="media/reel-poster.jpg" aria-label="Reel ¿Madre de tus padres?, 31 segundos, sin audio"><source src="media/reel-karol-01.mp4" type="video/mp4">Tu navegador no puede reproducir el vídeo. <a href="media/reel-karol-01.mp4">Descárgalo aquí</a>.</video>
+      <p>Reel «¿Madre de tus padres?», 31 s, vertical y sin audio. Los subtítulos son las frases que se dirían.</p>
+    </div>
+    <div>
+      <h3 class="mh">Carrusel «¿Eres la madre de tus padres?»</h3>
+      <p class="mp">Ocho diapositivas. Pulsa cualquiera para verla más grande.</p>
+      <div class="car">
+        <a href="media/carrusel-1.jpg"><img src="media/carrusel-1.jpg" alt="Diapositiva 1: portada con la pregunta" loading="lazy"></a>
+        <a href="media/carrusel-2.jpg"><img src="media/carrusel-2.jpg" alt="Diapositiva 2" loading="lazy"></a>
+        <a href="media/carrusel-3.jpg"><img src="media/carrusel-3.jpg" alt="Diapositiva 3" loading="lazy"></a>
+        <a href="media/carrusel-4.jpg"><img src="media/carrusel-4.jpg" alt="Diapositiva 4" loading="lazy"></a>
+        <a href="media/carrusel-5.jpg"><img src="media/carrusel-5.jpg" alt="Diapositiva 5" loading="lazy"></a>
+        <a href="media/carrusel-6.jpg"><img src="media/carrusel-6.jpg" alt="Diapositiva 6" loading="lazy"></a>
+        <a href="media/carrusel-7.jpg"><img src="media/carrusel-7.jpg" alt="Diapositiva 7: la frase" loading="lazy"></a>
+        <a href="media/carrusel-8.jpg"><img src="media/carrusel-8.jpg" alt="Diapositiva 8: cierre" loading="lazy"></a>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<section id="pendiente"><div class="wrap">
+  <span class="eyebrow">Para cerrar el diseño</span>
+  <h2>Lo que <em>falta</em> de Karol</h2>
+  <ul class="todo">
+    <li>Su foto profesional y su texto propio, con sus palabras.</li>
+    <li>Reseñas reales, con permiso y nombre. Las de ahora son de ejemplo.</li>
+    <li>La plataforma de pago (Hotmart o Shopify) y su enlace de compra.</li>
+    <li>La decisión final del nombre de la marca y de la imagen de Instagram.</li>
+    <li>Si el reel lleva voz en off, música o a ella en cámara.</li>
+    <li>Revisar textos, precios y bonos del kit.</li>
+  </ul>
+</div></section>
+</main>
+<footer><div class="wrap"><p>Prototipos de diseño para revisión. No es una tienda real: el pago es una simulación y no se cobra ni se guarda ningún dato. © 2026 KarolyTST · Carolina Muñoz Conde.</p></div></footer>
+
+<script>
+(function(){
+  var DEV = {mobile:{w:390,h:780,r:true}, tablet:{w:820,h:1040,r:true}, desktop:{w:1280,h:800,r:false}};
+  var proto = 'libro', dev = 'mobile';
+  var stage = document.getElementById('vstage'), fit = document.getElementById('vfit'), frame = document.getElementById('vframe'), ifr = document.getElementById('vif'), open = document.getElementById('vopen');
+  function layout(){
+    var d = DEV[dev], pad = 20, avail = stage.clientWidth - 2*Math.max(12, Math.min(34, stage.clientWidth*0.03));
+    var fw = d.w + 20, fh = d.h + 20, sc = Math.min(1, avail / fw);
+    frame.className = 'vframe' + (dev === 'desktop' ? ' desk' : '');
+    frame.style.width = fw + 'px'; frame.style.height = fh + 'px'; frame.style.transform = 'scale(' + sc + ')';
+    fit.style.width = Math.round(fw*sc) + 'px'; fit.style.height = Math.round(fh*sc) + 'px';
+  }
+  function set(){
+    var u = proto + '/';
+    if(ifr.getAttribute('src') !== u) ifr.setAttribute('src', u);
+    open.setAttribute('href', u);
+    document.querySelectorAll('[data-proto]').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-proto') === proto ? 'true' : 'false'); });
+    document.querySelectorAll('[data-dev]').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-dev') === dev ? 'true' : 'false'); });
+    layout();
+  }
+  document.querySelectorAll('[data-proto]').forEach(function(b){ b.addEventListener('click', function(){ proto = b.getAttribute('data-proto'); set(); }); });
+  document.querySelectorAll('[data-dev]').forEach(function(b){ b.addEventListener('click', function(){ dev = b.getAttribute('data-dev'); set(); }); });
+  document.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', function(){
+    proto = b.getAttribute('data-open'); if(window.innerWidth > 860) dev = 'desktop'; set();
+    document.getElementById('vista').scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+  }); });
+  if(window.innerWidth > 860) dev = 'desktop';
+  ifr.removeAttribute('loading');
+  window.addEventListener('resize', layout); set();
+})();
+</script>
+</body>
+</html>

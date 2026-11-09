@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EFE8D8">
+<meta name="robots" content="noindex, nofollow">
+<title>Libro KarolyTST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Idea: la web entera es un libro. El scroll (o las flechas, o un gesto lateral) pasa las páginas.
+   - Pantallas anchas y apaisadas: libro abierto de doble página.
+   - Móvil y tablet en vertical: libro de una página; la hoja se gira sobre el lomo igual que en el grande.
+   Paleta de marca: crema, papel, grafito, oro champagne. Cormorant para titulares y texto, Jost para detalles. */
+:root{
+  --crema:#FDFBF7; --papel:#FBF7EE; --mesa:#EFE8D8; --grafito:#2B2B2B; --gris:#6B655B;
+  --oro:#C5A059; --oro-osc:#8A6B2A; --linea:#E4DCCB;
+  --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --sans:"Jost","Helvetica Neue",Arial,sans-serif;
+  --hh:64px; --nh:76px; --pw:420px; --ph:560px; --fs:14px; --bw:420px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--mesa);color:var(--grafito);font-family:var(--serif);font-size:18px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+h1,h2,h3,p,ul,ol{margin:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6em;background:var(--oro);color:#1d1a14;text-decoration:none;font-family:var(--sans);font-weight:500;font-size:.95em;letter-spacing:.03em;padding:.9em 1.7em;border:1px solid var(--oro);border-radius:2px;min-height:44px;cursor:pointer;transition:background .4s,transform .4s,box-shadow .4s}
+.btn:hover{background:#b8913f;transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(138,107,42,.8)}
+.btn:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+
+/* Cabecera */
+header.top{position:fixed;inset:0 0 auto 0;height:var(--hh);z-index:60;display:flex;justify-content:space-between;align-items:center;padding:0 clamp(14px,3vw,36px);pointer-events:none}
+header.top>*{pointer-events:auto}
+.logo{font-family:var(--serif);font-size:1.5rem;font-weight:600;text-decoration:none;letter-spacing:.02em}
+.logo span{color:var(--oro-osc)}
+header.top .btn{padding:.5em 1.15em;font-size:.86rem;min-height:40px}
+#bar{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--oro);transform-origin:left;transform:scaleX(var(--sp,0));z-index:70}
+
+/* ========== LIBRO ========== */
+#pages{display:none}
+.pin{position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;display:grid;place-items:center;overflow:hidden;padding:var(--hh) 0 var(--nh);background:radial-gradient(ellipse at 50% 45%,#F6F1E4 0%,var(--mesa) 72%);touch-action:pan-y}
+.book{position:relative;width:var(--bw);height:var(--ph);perspective:2600px;will-change:transform}
+.single .book{perspective:1700px}
+.book::before{content:"";position:absolute;left:3%;right:3%;bottom:-4%;height:6%;background:radial-gradient(ellipse at center,rgba(40,28,8,.35),rgba(40,28,8,0) 70%);filter:blur(6px)}
+.leaf,.base{position:absolute;top:0;right:0;width:var(--pw);height:100%}
+.leaf{transform-origin:left center;transform-style:preserve-3d;will-change:transform}
+.base{z-index:1}
+.face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.face.back{transform:rotateY(180deg)}
+.base .face{backface-visibility:visible}
+
+/* Páginas: todo en em, así el contenido escala con el libro (--fs lo calcula el script) */
+.pg,.blank{font-size:calc(var(--fs)*var(--fit,1));background:var(--papel);padding:2.5em 2.4em 3em;overflow:hidden;color:var(--grafito);line-height:1.45;position:absolute}
+.pg.l{background-image:linear-gradient(to left,rgba(70,52,20,.17),rgba(70,52,20,0) 9%);border-radius:3px 0 0 3px}
+.pg.r{background-image:linear-gradient(to right,rgba(70,52,20,.17),rgba(70,52,20,0) 9%);border-radius:0 3px 3px 0}
+.blank{background-image:linear-gradient(to left,rgba(70,52,20,.12),rgba(70,52,20,0) 9%);border-radius:3px 0 0 3px}
+.pg::after,.blank::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(30,20,5,.34),rgba(30,20,5,0) 70%);opacity:var(--sh,0)}
+.back::after{background:linear-gradient(270deg,rgba(30,20,5,.34),rgba(30,20,5,0) 70%)}
+.folio{position:absolute;bottom:1.3em;font-family:var(--sans);font-size:max(.72em,11px);color:var(--gris);letter-spacing:.1em}
+.l .folio{left:2.4em}.r .folio{right:2.4em}
+.single .folio{left:0;right:0;text-align:center}
+.tt{font-weight:500;font-size:2.15em;line-height:1.05;text-wrap:balance;margin-bottom:.55em}
+.tt em,.q em{color:var(--oro-osc)}
+.note{font-style:italic;color:var(--oro-osc);font-size:1.05em;margin-bottom:.5em;display:block}
+.txt{color:var(--gris);font-size:1.02em;max-width:27em}
+.items{list-style:none;padding:0;display:grid;gap:1.05em;margin-top:1.1em}
+.items li{padding-left:1.5em;position:relative}
+.items li::before{content:"";position:absolute;left:0;top:.62em;width:.5em;height:.5em;border:1px solid var(--oro);transform:rotate(45deg)}
+.items b{display:block;font-weight:500;font-size:1.35em;line-height:1.15;margin-bottom:.15em}
+.items span{color:var(--gris);font-size:1em}
+.q{font-style:italic;font-size:1.7em;line-height:1.2;text-wrap:balance}
+.single .pg,.single .blank{padding:2.2em 1.9em 3em}
+.single .tt{font-size:2em}
+
+/* Portada */
+.cover{background:var(--grafito)!important;color:var(--crema);border-radius:2px 8px 8px 2px!important;padding:3em 2.6em;display:flex;flex-direction:column;justify-content:space-between;box-shadow:inset 10px 0 0 rgba(255,255,255,.05);background-image:none!important}
+.cover::before{content:"";position:absolute;inset:1.2em;border:1px solid var(--oro);opacity:.7;border-radius:1px 5px 5px 1px;pointer-events:none}
+.cover .ort{position:absolute;right:0;top:3em;width:70%;opacity:.9;pointer-events:none}
+.cover .ort path,.cover .ort circle{fill:none;stroke:var(--oro);stroke-width:1.1;stroke-linecap:round}
+.cover .ctitle{position:relative;margin-top:auto}
+.cover .ctitle small{display:block;font-family:var(--sans);font-size:.72em;letter-spacing:.28em;text-transform:uppercase;color:var(--oro);margin-bottom:1.2em}
+.cover h1{font-weight:500;font-size:3.5em;line-height:.98;text-wrap:balance}
+.single .cover h1{font-size:3em}
+.cover h1 em{color:var(--oro)}
+.cover p{margin-top:1.2em;color:#d3cab6;max-width:19em;font-size:1.05em}
+.hint{position:relative;margin-top:1.8em;font-family:var(--sans);font-size:.78em;letter-spacing:.14em;color:var(--oro);display:flex;align-items:center;gap:.8em}
+.hint i{display:block;width:1px;height:2.4em;background:var(--oro);position:relative;overflow:hidden}
+.hint i::after{content:"";position:absolute;left:0;top:-100%;width:1px;height:100%;background:var(--crema);animation:drop 2s ease-in-out infinite}
+@keyframes drop{to{top:100%}}
+
+/* Pilares */
+.pil{display:grid;gap:1.4em;margin-top:1.2em}
+.pil div{display:grid;grid-template-columns:2.6em 1fr;gap:1em;align-items:start}
+.pil svg{width:2.6em;height:2.6em}
+.pil svg *{fill:none;stroke:var(--oro-osc);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.pil b{font-weight:500;font-size:1.35em;line-height:1.1;display:block}
+.pil span{color:var(--gris);font-size:1em}
+
+/* Kit */
+.kit{list-style:none;padding:0;margin-top:1em;display:grid;gap:.9em}
+.kit li{display:grid;grid-template-columns:1fr auto;gap:.2em 1em;padding-bottom:.9em;border-bottom:1px solid var(--linea)}
+.kit b{font-weight:500;font-size:1.3em;line-height:1.1}
+.kit s{font-family:var(--sans);font-size:.85em;color:var(--gris);text-decoration:none}
+.kit span{grid-column:1/-1;color:var(--gris);font-size:.97em}
+
+/* 21 días */
+.dias{position:relative;margin-top:1.3em;display:grid;gap:1.3em;padding-left:2em}
+.dias::before{content:"";position:absolute;left:.45em;top:.5em;bottom:.5em;width:1px;background:var(--oro)}
+.dias div{position:relative}
+.dias div::before{content:"";position:absolute;left:-1.85em;top:.45em;width:.8em;height:.8em;border-radius:50%;background:var(--papel);border:1px solid var(--oro)}
+.dias small{font-family:var(--sans);font-size:.75em;letter-spacing:.14em;color:var(--oro-osc)}
+.dias b{display:block;font-weight:500;font-size:1.4em;line-height:1.1}
+.dias span{color:var(--gris);font-size:1em}
+
+/* Oferta */
+.oferta{list-style:none;padding:0;margin:1em 0 0;font-size:1em}
+.oferta li{display:flex;justify-content:space-between;gap:1em;padding:.65em 0;border-bottom:1px solid var(--linea)}
+.oferta s{color:var(--gris);white-space:nowrap;font-family:var(--sans);font-size:.9em}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin:1em 0 1.1em}
+.total small{font-family:var(--sans);color:var(--gris);font-size:.85em;line-height:1.3}
+.total b{font-weight:500;font-size:4em;line-height:1;color:var(--oro-osc)}
+.pg .btn{font-size:.95em;width:100%}
+.trust{font-family:var(--sans);font-size:.72em;color:var(--gris);text-align:center;margin-top:1em;letter-spacing:.03em}
+
+/* Sello de garantía */
+.dark{background:var(--grafito)!important;color:var(--crema);background-image:none!important}
+.dark.r{background-image:linear-gradient(to right,rgba(0,0,0,.35),rgba(0,0,0,0) 9%)!important}
+.dark .folio{color:#a99f8b}
+.dark .tt{color:var(--crema)}.dark .tt em{color:var(--oro)}
+.dark .txt{color:#d3cab6;text-align:center;margin-inline:auto}
+.seal{width:15em;height:15em;margin:.2em auto 1.1em}
+.single .seal{width:12.5em;height:12.5em;margin-bottom:.9em}
+.seal svg{width:100%;height:100%;display:block;overflow:visible}
+.seal .ring{transform-origin:160px 160px;animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seal .n7{font-family:var(--serif);font-size:124px;font-weight:500;fill:#C5A059;font-variant-numeric:lining-nums;font-feature-settings:"lnum"}
+.seal .dd{font-family:var(--sans);font-size:17px;font-weight:400;letter-spacing:7px;fill:#FDFBF7}
+.dark .gt{text-align:center;font-size:1.9em;line-height:1.1;font-weight:500;text-wrap:balance;margin-bottom:.5em}
+.single .dark .gt{font-size:1.65em}
+.dark .gt em{color:var(--oro)}
+
+/* Karol */
+.foto{height:11.5em;margin:.6em 0 1.1em;background:linear-gradient(160deg,#F3ECDD,#E8DCC2);border:1px solid var(--linea);display:grid;place-items:center;text-align:center;color:var(--gris);font-family:var(--sans);font-size:.8em;padding:1em;position:relative}
+.single .foto{height:9.5em}
+.foto::after{content:"";position:absolute;inset:.6em;border:1px solid var(--oro);opacity:.6}
+.sign{font-style:italic;font-size:1.7em;margin-top:.5em}
+
+/* Preguntas: apertura suave */
+.qa{border-top:1px solid var(--linea)}
+.qa:last-child{border-bottom:1px solid var(--linea)}
+.qa button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;justify-content:space-between;gap:1em;align-items:center;padding:.95em 0;min-height:44px;font-family:var(--serif);font-size:1.3em;line-height:1.15;color:var(--grafito);transition:color .6s ease}
+.qa button:hover{color:var(--oro-osc)}
+.qa button:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+.qa i{flex:none;width:.9em;height:.9em;position:relative}
+.qa i::before,.qa i::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--oro-osc);transition:transform .7s cubic-bezier(.4,0,.2,1),opacity .7s}
+.qa i::after{transform:rotate(90deg)}
+.qa.open i::after{transform:rotate(0);opacity:0}
+.qa .ans{display:grid;grid-template-rows:0fr;transition:grid-template-rows .8s cubic-bezier(.4,0,.2,1)}
+.qa .ans>div{overflow:hidden;opacity:0;transition:opacity .9s ease .1s}
+.qa.open .ans{grid-template-rows:1fr}
+.qa.open .ans>div{opacity:1}
+.qa .ans p{padding:0 0 1.1em;color:var(--gris);font-size:1em;max-width:27em}
+
+/* ----- Navegación inferior ----- */
+.nav{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:55;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 20px);background:rgba(253,251,247,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--linea);padding:5px;border-radius:99px;box-shadow:0 10px 26px -16px rgba(60,40,10,.55);transition:opacity .5s}
+.nav .arr{all:unset;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--grafito);transition:background .3s,opacity .3s}
+.nav .arr:hover{background:var(--mesa)}
+.nav .arr:focus-visible{outline:2px solid var(--grafito);outline-offset:2px}
+.nav .arr[aria-disabled="true"]{opacity:.3;cursor:default;pointer-events:none}
+.nav .arr svg{width:20px;height:20px}
+.nav .lbl{font-family:var(--sans);font-size:.86rem;letter-spacing:.02em;color:var(--grafito);text-align:center;min-width:min(200px,52vw);padding:0 6px;line-height:1.2}
+.nav .lbl small{display:block;color:var(--gris);font-size:.74rem;letter-spacing:.08em;margin-top:2px}
+.nav .pills{display:flex;gap:2px}
+.nav .pills button{all:unset;box-sizing:border-box;cursor:pointer;font-family:var(--sans);font-size:.78rem;letter-spacing:.04em;padding:0 .95em;border-radius:99px;color:var(--gris);transition:background .4s,color .4s;min-height:40px;display:inline-flex;align-items:center;white-space:nowrap}
+.nav .pills button:hover{color:var(--grafito)}
+.nav .pills button.on{background:var(--grafito);color:var(--crema)}
+.nav .pills button:focus-visible{outline:2px solid var(--grafito);outline-offset:2px}
+
+/* Aviso en móvil apaisado */
+.rot{display:none;position:fixed;inset:0;z-index:90;background:var(--mesa);place-content:center;text-align:center;gap:14px;padding:24px}
+.rot svg{width:54px;height:54px;margin:0 auto;animation:tilt 2.8s ease-in-out infinite}
+.rot svg *{fill:none;stroke:var(--oro-osc);stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.rot p{font-size:1.3rem;line-height:1.25;max-width:16em}
+@keyframes tilt{0%,15%{transform:rotate(-90deg)}55%,100%{transform:rotate(0)}}
+@media (orientation:landscape) and (max-height:500px) and (max-width:1000px){.rot{display:grid}}
+
+/* ----- Cierre con cintas infinitas ----- */
+.cierre{background:var(--crema);padding:clamp(60px,9vw,110px) 0 0;position:relative;z-index:2}
+.cierre .in{width:min(900px,92vw);margin:0 auto;text-align:center;padding-bottom:clamp(56px,8vw,90px)}
+.cierre h2{font-weight:500;font-size:clamp(2.2rem,5vw,3.8rem);line-height:1.05;text-wrap:balance;margin-bottom:1.6rem}
+.cierre h2 em{color:var(--oro-osc)}
+.band{overflow:hidden;border-block:1px solid var(--linea);white-space:nowrap;padding:20px 0}
+.band+.band{border-top:0;background:var(--grafito)}
+.track{display:inline-flex;animation:marq 42s linear infinite}
+.band.rev .track{animation-direction:reverse;animation-duration:50s}
+.band span{font-style:italic;font-size:clamp(1.5rem,3vw,2.3rem);padding-right:2.4rem}
+.band.rev span{color:var(--crema)}
+.band span b{font-style:normal;color:var(--oro);font-weight:400;padding-left:2.4rem}
+.band:hover .track{animation-play-state:paused}
+@keyframes marq{to{transform:translateX(-50%)}}
+footer{background:var(--crema);padding:40px 0 56px;font-family:var(--sans);font-size:.8rem;color:var(--gris)}
+footer p{width:min(60em,92vw);margin:.4em auto;text-align:center}
+
+
+/* Arte que rellena el hueco de cada página: se encoge solo si falta sitio */
+.pg{display:flex;flex-direction:column}
+.pg>*{flex:none}
+.pg>.art{flex:1 1 0;min-height:0;display:grid;place-items:center;color:var(--oro-osc);opacity:.8;padding:.6em 0 1.4em;overflow:hidden}
+.pg>.art svg{width:100%;height:100%;max-height:100%;display:block}
+.pg>.art svg text{font-family:var(--serif)}
+.cover.pg>.art{display:none}
+/* Reseñas con carrusel */
+.pg>.rvs{flex:1 1 0;min-height:0;display:flex;flex-direction:column;outline:none;margin-top:.4em}
+.rvs:focus-visible{outline:2px solid var(--grafito);outline-offset:4px}
+.rvs-view{flex:1 1 0;min-height:0;overflow:hidden;position:relative;touch-action:pan-y}
+.rvs-track{display:flex;height:100%;transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+.rv-s{flex:0 0 100%;margin:0;padding:0 .1em;display:flex;flex-direction:column;justify-content:center;gap:1em}
+.rv-st svg{width:7em;height:1.25em;fill:var(--oro);display:block}
+.rv-s blockquote{margin:0;font:italic 400 1.6em/1.25 var(--serif);text-wrap:balance}
+.rv-s blockquote::before{content:"“";display:block;font-size:2.6em;line-height:.6;color:var(--oro);margin-bottom:.1em}
+.rv-s figcaption{display:flex;gap:.8em;align-items:center;color:var(--gris);font-size:1em}
+.rv-s figcaption i{flex:none;width:2.6em;height:2.6em;border-radius:50%;border:1px solid var(--oro);display:grid;place-items:center;font:500 1.2em var(--serif);color:var(--oro-osc);font-style:normal}
+.rv-s figcaption span{display:block;line-height:1.25}
+.rv-s figcaption small{display:block;font:500 .66em var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--oro-osc);margin-top:.2em}
+.rvs-ctl{flex:none;display:flex;align-items:center;justify-content:space-between;gap:.5em;padding-top:.6em}
+.rv-a{all:unset;box-sizing:border-box;flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--linea);display:grid;place-items:center;cursor:pointer;color:var(--grafito);transition:background .3s,border-color .3s}
+.rv-a:hover{background:var(--mesa);border-color:var(--oro)}
+.rv-a:focus-visible,.rv-d:focus-visible{outline:2px solid var(--grafito);outline-offset:2px}
+.rv-a svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rv-dots{display:flex;gap:2px;align-items:center}
+.rv-d{all:unset;box-sizing:border-box;width:26px;height:44px;display:grid;place-items:center;cursor:pointer}
+.rv-d::before{content:"";width:8px;height:8px;border-radius:50%;border:1px solid var(--oro-osc);transition:background .3s,transform .3s}
+.rv-d[aria-current="true"]::before{background:var(--oro-osc);transform:scale(1.25)}
+.rv-note{flex:none;font:400 max(.72em,11px)/1.35 var(--sans);color:var(--gris);margin:.6em 0 1.5em;max-width:27em}
+@media (prefers-reduced-motion:reduce){.rvs-track{transition:none}}
+
+/* Movimiento reducido: el libro sigue siendo libro, pero la hoja cambia de golpe, sin giro ni animaciones infinitas */
+@media (prefers-reduced-motion:reduce){
+  .track{animation:none}.band{overflow-x:auto}.hint i::after{animation:none}.seal .ring{animation:none}.rot svg{animation:none}
+  .qa .ans,.qa .ans>div,.qa i::before,.qa i::after{transition:none}
+}
+/* ===== TIENDA: libro con volumen y compra en la misma página ===== */
+.shop{background:#F5F0E6;padding:clamp(64px,9vw,120px) 0;font-family:var(--sans);font-weight:300;font-size:18px;line-height:1.6;color:var(--grafito);position:relative;z-index:2}
+.shop *{box-sizing:border-box}
+.shop .wrap{width:min(1120px,100% - 40px);margin-inline:auto}
+.shop h2{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,4.2vw,3.2rem);line-height:1.08;margin:0 0 .5rem;text-wrap:balance}
+.shop h2 em{font-style:italic;color:var(--oro-osc)}
+.shop .sh-eyebrow{font-size:.78rem;letter-spacing:.24em;text-transform:uppercase;color:var(--oro-osc);font-weight:500;display:block;margin-bottom:1rem}
+.sh-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;margin-top:2.4rem}
+.sh-panel{background:var(--crema);border:1px solid var(--linea);padding:clamp(24px,4vw,44px);box-shadow:0 30px 50px -36px rgba(60,40,10,.5)}
+.sh-panel h3{font:500 clamp(1.6rem,2.6vw,2rem)/1.1 var(--serif);margin:0}
+.sh-panel .au{color:var(--gris);font-size:.95rem;margin:.3rem 0 1.2rem}
+.sh-list{list-style:none;margin:0 0 1.2rem;padding:0}
+.sh-list li{display:flex;gap:12px;align-items:flex-start;padding:.7rem 0;border-bottom:1px solid var(--linea);font-size:1rem}
+.sh-list li svg{flex:none;width:20px;height:20px;margin-top:4px}
+.sh-list li svg *{fill:none;stroke:var(--oro-osc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sh-list li span{flex:1}
+.sh-list li s{color:var(--gris);white-space:nowrap;font-size:.9rem}
+.sh-price{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:.4rem 0 1.2rem}
+.sh-price b{font:400 clamp(3rem,5.5vw,3.8rem)/1 var(--sans);letter-spacing:-.02em;color:var(--oro-osc)}
+.sh-price s{color:var(--gris)}
+.sh-price span{font-size:.88rem;color:var(--gris);margin-left:auto}
+.sh-buy{display:flex;width:100%;align-items:center;justify-content:center;gap:.7em;background:var(--oro);color:#1d1a14;border:1px solid var(--oro);min-height:56px;padding:0 1.6rem;border-radius:2px;font:500 1.02rem var(--sans);letter-spacing:.04em;cursor:pointer;text-decoration:none;transition:background .3s,transform .3s,box-shadow .3s}
+.sh-buy:hover{background:#b8913f;transform:translateY(-2px);box-shadow:0 12px 24px -14px rgba(138,107,42,.85)}
+.sh-buy:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+.sh-buy svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sh-sec{display:flex;gap:10px 20px;flex-wrap:wrap;justify-content:center;margin:1rem 0 0;font-size:.84rem;color:var(--gris)}
+.sh-guar{display:flex;gap:14px;align-items:center;margin-top:1.3rem;padding-top:1.2rem;border-top:1px solid var(--linea);font-size:.92rem;color:var(--gris)}
+.sh-guar i{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid var(--oro);display:grid;place-items:center;font:400 1.5rem/1 var(--sans);color:var(--oro-osc);font-style:normal;outline:1px dashed rgba(197,160,89,.6);outline-offset:3px}
+.sh-guar b{color:var(--grafito);font-weight:500}
+.sh-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,3vw,32px);margin-top:clamp(36px,5vw,64px);counter-reset:s}
+.sh-steps div{border-top:1px solid var(--oro);padding-top:1rem;font-size:.98rem;color:var(--gris)}
+.sh-steps b{display:block;font:500 1.4rem/1.1 var(--serif);color:var(--grafito);margin-bottom:.3rem}
+.sh-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,30px);opacity:0;pointer-events:none;z-index:100;background:var(--grafito);color:var(--crema);padding:.9rem 1.3rem;border-radius:4px;font:400 .92rem var(--sans);max-width:min(92vw,440px);text-align:center;transition:opacity .4s,transform .4s}
+.sh-toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* Escenario del libro: ejemplar de tapa dura, tablet y tres llaves */
+.sh-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:clamp(18px,2.4vw,28px);outline:none}
+.sh-stage:focus-visible{outline:2px solid var(--grafito);outline-offset:6px}
+.sh-badge{font:500 .72rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--oro-osc);border:1px solid var(--oro);padding:.5em 1em;border-radius:99px;background:rgba(253,251,247,.7)}
+.sh-comp{--w:clamp(190px,21vw,250px);position:relative;width:min(100%,560px);height:calc(var(--w)*1.42 + 70px)}
+.sh-persp{position:absolute;left:4%;top:28px;perspective:1500px;touch-action:pan-y;cursor:grab}
+.sh-persp:active{cursor:grabbing}
+.bk{--t:calc(var(--w)*.15);width:var(--w);height:calc(var(--w)*1.42);position:relative;transform-style:preserve-3d;transform:rotateX(4deg) rotateY(var(--ry,-26deg))}
+.bk.snap{transition:transform .9s cubic-bezier(.3,.7,.2,1)}
+.bk>div{position:absolute;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.bk .fr,.bk .bc{left:0;top:0;width:100%;height:100%;border-radius:2px 6px 6px 2px;overflow:hidden;background:#171715}
+.bk .fr{transform:translateZ(calc(var(--t)/2))}
+.bk .fr svg{display:block;width:100%;height:100%}
+.bk .fr::before{content:"";position:absolute;top:0;bottom:0;left:4.6%;width:2.4%;background:linear-gradient(90deg,rgba(0,0,0,.55),rgba(255,255,255,.16) 55%,rgba(0,0,0,0));pointer-events:none}
+.bk .fr::after{content:"";position:absolute;inset:0;background:linear-gradient(118deg,rgba(255,255,255,.2) 0,rgba(255,255,255,0) 28%,rgba(255,255,255,0) 62%,rgba(0,0,0,.3) 100%);pointer-events:none}
+.bk .bc{transform:rotateY(180deg) translateZ(calc(var(--t)/2));padding:calc(var(--w)*.12) calc(var(--w)*.12) calc(var(--w)*.1) calc(var(--w)*.1);color:var(--crema);display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(160deg,#252420,#14130f)}
+.bk .bc::before{content:"";position:absolute;inset:calc(var(--w)*.045);border:1px solid var(--oro);opacity:.6;pointer-events:none}
+.bk .bc p{font:italic 400 calc(var(--w)*.075)/1.26 var(--serif);margin:0;color:var(--crema)}
+.bk .bc p em{color:#E3C27A}
+.bk .bc span{font:400 calc(var(--w)*.05)/1.4 var(--sans);color:#cfc7b6;display:block}
+.bk .bc u{text-decoration:none;font:500 calc(var(--w)*.04) var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#E3C27A}
+.bk .sp{left:calc(var(--t)/-2);top:0;width:var(--t);height:100%;background:linear-gradient(90deg,#0f0e0c,#37342e 38%,#2a2823 62%,#0f0e0c);transform:rotateY(-90deg);display:grid;place-items:center;border-radius:2px 0 0 2px}
+.bk .sp span{writing-mode:vertical-rl;transform:rotate(180deg);font:500 calc(var(--w)*.08) var(--serif);color:var(--crema);white-space:nowrap;display:flex;align-items:center;gap:.9em}
+.bk .sp span em{color:#E3C27A;font-style:normal;font-family:var(--sans);font-size:.5em;letter-spacing:.24em}
+.bk .pg3{left:calc(100% - var(--t)/2 + 3px - 3px);top:1.3%;width:calc(var(--t) - 7px);height:97.4%;margin-left:-3px;transform:rotateY(90deg);background:linear-gradient(90deg,rgba(0,0,0,.18),rgba(0,0,0,0) 30%,rgba(0,0,0,.12)),repeating-linear-gradient(90deg,#fbf7ee 0 1.5px,#e2d9c4 1.5px 2.6px)}
+.bk .pt,.bk .pb{left:2%;width:95.5%;height:calc(var(--t) - 7px);background:linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,0) 40%),repeating-linear-gradient(0deg,#fbf7ee 0 1.5px,#e2d9c4 1.5px 2.6px)}
+.bk .pt{top:calc((var(--t) - 7px)/-2 + 3px);transform:rotateX(90deg)}
+.bk .pb{bottom:calc((var(--t) - 7px)/-2 + 3px);transform:rotateX(-90deg)}
+.sh-floor{position:absolute;left:calc(4% - 4px);top:calc(28px + var(--w)*1.42 - 16px);width:calc(var(--w)*1.7);height:46px;background:radial-gradient(ellipse at 40% 50%,rgba(35,24,6,.5),rgba(35,24,6,0) 68%);filter:blur(7px);pointer-events:none}
+.sh-tab{position:absolute;right:1%;bottom:0;width:calc(var(--w)*.92);aspect-ratio:3/4.2;background:#101010;border-radius:12px;padding:7px;transform:rotate(2.5deg);box-shadow:inset 0 0 0 1.5px #303030,0 26px 34px -18px rgba(35,24,6,.7),0 4px 8px -4px rgba(0,0,0,.5);pointer-events:none}
+.sh-tab::before{content:"";position:absolute;top:3px;left:50%;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:#2a2a2a}
+.sh-tab .scr{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;background:#171715}
+.sh-tab .scr svg{display:block;width:100%;height:100%}
+.sh-tab .scr::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.16),rgba(255,255,255,0) 42%)}
+.sh-bonus{display:flex;gap:clamp(10px,1.8vw,18px);justify-content:center;width:100%;pointer-events:none}
+.bn{width:clamp(88px,10.5vw,112px);aspect-ratio:1/1.42;background:#F1E9D8;background-image:radial-gradient(rgba(138,107,42,.08) 1px,transparent 1.2px);background-size:5px 5px;border-radius:1px 4px 4px 1px;box-shadow:inset 3px 0 0 rgba(0,0,0,.05),1px 0 0 #e1d8c2,2px 0 0 #faf6ec,3px 0 0 #e1d8c2,5px 12px 18px -8px rgba(60,40,10,.55);padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center}
+.bn:nth-child(1){transform:rotate(-2.5deg)}.bn:nth-child(2){transform:translateY(-6px)}.bn:nth-child(3){transform:rotate(2deg)}
+.bn svg{width:36px;height:36px}
+.bn svg *{fill:none;stroke:var(--oro-osc);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.bn b{font:500 .9rem/1.1 var(--serif);color:var(--grafito);display:block}
+.bn small{font:400 .62rem/1.2 var(--sans);color:var(--gris);display:block}
+.bn u{text-decoration:none;font:500 .6rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--oro-osc)}
+.sh-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.sh-tools button{all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:0 1.1em;border:1px solid var(--oro-osc);border-radius:99px;font:500 .82rem var(--sans);letter-spacing:.05em;color:var(--oro-osc);transition:background .3s,color .3s}
+.sh-tools button:hover{background:var(--oro-osc);color:var(--crema)}
+.sh-tools button:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+.sh-tools span{font-size:.78rem;color:var(--gris)}
+@media (max-width:860px){
+  .sh-grid{grid-template-columns:1fr}
+  .sh-steps{grid-template-columns:1fr}
+  .sh-comp{--w:min(44vw,190px);width:min(100%,420px)}
+  .sh-persp{left:0}
+  .sh-floor{left:-4px}
+  .bn{width:min(26vw,100px)}
+}
+@media (prefers-reduced-motion:reduce){.bk.snap{transition:none}.sh-toast{transition:none}}
+
+/* ===== PASARELA DE PAGO SIMULADA + ENTRADA DE LA TIENDA ===== */
+.sh-pay{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:1rem 0 0;padding:0;list-style:none}
+.sh-pay li{font:500 .76rem/1 var(--sans);letter-spacing:.03em;color:var(--grafito);background:#fff;border:1px solid var(--linea);border-radius:6px;padding:.6em .85em;white-space:nowrap}
+.sh-pay li.mini{border-style:dashed;color:var(--gris);font-weight:400}
+.shop .e{transition:opacity .95s cubic-bezier(.2,.7,.2,1),transform .95s cubic-bezier(.2,.7,.2,1);transition-delay:var(--ed,0s)}
+.shop.pre .e{opacity:0;transform:translateY(28px)}
+.co[hidden]{display:none}
+.co{position:fixed;inset:0;z-index:120;display:grid;place-items:center;font-family:var(--sans);font-weight:300;font-size:16px;line-height:1.55;color:var(--grafito)}
+.co *{box-sizing:border-box}
+.co-bg{position:absolute;inset:0;background:rgba(30,24,12,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);opacity:0;transition:opacity .4s}
+.co-dlg{position:relative;width:min(900px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;background:var(--crema);border:1px solid var(--linea);border-radius:6px;box-shadow:0 40px 80px -30px rgba(0,0,0,.6);opacity:0;transform:translateY(24px) scale(.98);transition:opacity .45s,transform .55s cubic-bezier(.2,.8,.2,1);outline:none}
+.co.on .co-bg{opacity:1}.co.on .co-dlg{opacity:1;transform:none}
+.co-x{all:unset;box-sizing:border-box;position:absolute;right:10px;top:10px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;z-index:2;color:var(--grafito)}
+.co-x:hover{background:var(--mesa,#EFE8D8)}.co-x:focus-visible{outline:2px solid var(--grafito);outline-offset:2px}
+.co-x svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;fill:none}
+.co-demo{margin:0;background:var(--grafito);color:#e8dfca;font-size:.8rem;padding:.65rem 56px .65rem 1.2rem;border-radius:5px 5px 0 0}
+.co-cols{display:grid;grid-template-columns:.85fr 1.15fr}
+.co-sum{background:#F5F0E6;padding:clamp(20px,3.4vw,36px);border-right:1px solid var(--linea)}
+.co-sum .bkm{width:min(46%,150px);aspect-ratio:1/1.42;margin:0 0 1.1rem;border-radius:2px 5px 5px 2px;overflow:hidden;box-shadow:6px 12px 20px -10px rgba(40,28,8,.6),inset 3px 0 0 rgba(255,255,255,.08)}
+.co-sum .bkm svg{display:block;width:100%;height:100%}
+.co-sum h3{font:500 1.5rem/1.1 var(--serif);margin:0 0 .2rem}
+.co-sum p{margin:0 0 1rem;color:var(--gris);font-size:.9rem}
+.co-sum ul{list-style:none;margin:0 0 1rem;padding:0}
+.co-sum li{display:flex;gap:10px;padding:.45rem 0;border-bottom:1px solid var(--linea);font-size:.92rem}
+.co-sum li svg{flex:none;width:16px;height:16px;margin-top:4px}.co-sum li svg *{fill:none;stroke:var(--oro-osc);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.co-tot{display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem;color:var(--gris)}
+.co-tot b{font:400 2.3rem/1 var(--sans);color:var(--oro-osc);letter-spacing:-.02em}
+.co-form{padding:clamp(20px,3.4vw,36px);padding-top:clamp(28px,3.4vw,44px)}
+.co-form h2{font:500 clamp(1.7rem,3vw,2.1rem)/1.1 var(--serif);margin:0 0 1.2rem}
+.co-f{display:block;margin-bottom:1rem}
+.co-f span{display:block;font-size:.84rem;font-weight:500;margin-bottom:.35rem}
+.co-f input{width:100%;min-height:48px;border:1px solid #cfc5ae;background:#fff;border-radius:3px;padding:0 .9rem;font:400 1rem var(--sans);color:var(--grafito)}
+.co-f input:focus{outline:2px solid var(--oro);outline-offset:1px;border-color:var(--oro)}
+.co-f input[aria-invalid="true"]{border-color:#a8452d}
+.co-err{display:block;color:#a8452d;font-size:.82rem;min-height:1.1em;margin-top:.25rem}
+.co-form fieldset{border:0;margin:0 0 1rem;padding:0}
+.co-form legend{font-size:.84rem;font-weight:500;margin-bottom:.5rem;padding:0}
+.co-m{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}
+.co-m label{position:relative;cursor:pointer}
+.co-m input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.co-m span{display:grid;place-items:center;min-height:48px;border:1px solid #cfc5ae;background:#fff;border-radius:3px;font:500 .86rem var(--sans);padding:.4rem .5rem;text-align:center;transition:border-color .25s,box-shadow .25s,background .25s}
+.co-m small{display:block;font:300 .66rem var(--sans);color:var(--gris)}
+.co-m input:checked+span{border-color:var(--oro);box-shadow:0 0 0 1px var(--oro) inset;background:#fffaf0}
+.co-m input:focus-visible+span{outline:2px solid var(--grafito);outline-offset:2px}
+.co-note{background:#F5F0E6;border:1px dashed var(--oro);border-radius:3px;padding:.8rem .95rem;font-size:.88rem;color:var(--gris);margin:0 0 1rem;min-height:3.2rem}
+.co-note .sk{display:grid;grid-template-columns:1fr 70px 70px;gap:8px;margin-top:.6rem}
+.co-note .sk i{display:block;height:34px;background:#e9e1cf;border-radius:3px}
+.co-chk{display:flex;gap:.7rem;align-items:flex-start;font-size:.88rem;color:var(--gris);margin-bottom:1rem;cursor:pointer}
+.co-chk input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--oro-osc)}
+.co-pay{margin-top:.2rem}
+.co-pay[disabled]{opacity:.7;cursor:progress}
+.co-sp{width:18px;height:18px;border:2px solid rgba(29,26,20,.3);border-top-color:#1d1a14;border-radius:50%;animation:cosp .8s linear infinite}
+@keyframes cosp{to{transform:rotate(360deg)}}
+.co-sec{display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:center;font-size:.78rem;color:var(--gris);margin:.9rem 0 0}
+.co-ok{padding:clamp(28px,5vw,56px);text-align:center;max-width:620px;margin:0 auto}
+.co-ok .tick{width:76px;height:76px;margin:0 auto 1.2rem;border-radius:50%;border:1px solid var(--oro);display:grid;place-items:center;outline:1px dashed rgba(197,160,89,.6);outline-offset:5px}
+.co-ok .tick svg{width:36px;height:36px;fill:none;stroke:var(--oro-osc);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40}
+.co.done .co-ok .tick svg{animation:cotick .8s .2s ease forwards}
+@keyframes cotick{to{stroke-dashoffset:0}}
+.co-ok h2{font:500 clamp(1.8rem,4vw,2.4rem)/1.1 var(--serif);margin:0 0 .6rem}
+.co-ok p{color:var(--gris);margin:0 0 1.2rem}
+.co-ok ul{list-style:none;margin:0 0 1.4rem;padding:0;text-align:left;display:grid;gap:8px}
+.co-ok li{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--linea);background:#fff;border-radius:3px;padding:.7rem .9rem;font-size:.95rem}
+.co-ok li em{font-style:normal;font-size:.78rem;color:var(--gris);white-space:nowrap}
+.co-ok .co-demo2{font-size:.8rem;color:var(--gris);margin-top:1rem}
+@media (max-width:760px){
+  .co{place-items:end center}
+  .co-dlg{width:100%;max-height:96dvh;border-radius:14px 14px 0 0;border-bottom:0;transform:translateY(60px)}
+  .co-demo{border-radius:14px 14px 0 0}
+  .co-cols{grid-template-columns:1fr}
+  .co-sum{border-right:0;border-bottom:1px solid var(--linea);display:grid;grid-template-columns:76px 1fr;gap:0 14px;align-items:start}
+  .co-sum .bkm{width:76px;margin:0;grid-row:1/3}
+  .co-sum ul{display:none}
+  .co-sum p{margin:0 0 .5rem}
+  .co-tot{grid-column:2}
+  .co-m{grid-template-columns:repeat(2,1fr)}
+}
+@media (prefers-reduced-motion:reduce){.shop .e,.co-bg,.co-dlg{transition:none}.shop.pre .e{opacity:1;transform:none}.co.done .co-ok .tick svg{animation:none;stroke-dashoffset:0}.co-sp{animation-duration:2s}}
+
+/* Transición al pasar del libro a la tienda */
+.veil{position:fixed;inset:0;z-index:95;background:var(--crema);display:grid;place-items:center;opacity:0;pointer-events:none;transition:opacity .6s ease}
+.veil.on{opacity:1;pointer-events:auto}
+.veil .vl{text-align:center;transform:translateY(14px);opacity:0;transition:transform .8s cubic-bezier(.2,.7,.2,1) .1s,opacity .7s .1s}
+.veil.on .vl{transform:none;opacity:1}
+.veil .vl span{font:600 2rem/1 var(--serif);letter-spacing:.02em}
+.veil .vl span b{font-weight:600;color:var(--oro-osc)}
+.veil .vl i{display:block;height:1px;width:0;margin:14px auto 0;background:var(--oro);transition:width .9s cubic-bezier(.4,0,.2,1) .15s}
+.veil.on .vl i{width:140px}
+body.leaving .stage{transform:scale(.96);opacity:.3;transition:transform .7s ease,opacity .7s ease}
+@media (prefers-reduced-motion:reduce){.veil,.veil .vl,.veil .vl i{transition:none}}
+
+</style>
+</head>
+<body>
+<div class="veil" id="veil" aria-hidden="true"><div class="vl"><span>Karoly<b>TST</b></span><i></i></div></div>
+<div id="bar" aria-hidden="true"></div>
+<header class="top">
+  <a class="logo" href="#libro" aria-label="KarolyTST, volver a la portada">Karoly<span>TST</span></a>
+  <a class="btn" href="#tienda" id="hdr-cta">Quiero empezar</a>
+</header>
+
+<main id="libro">
+<div class="pin" id="pin">
+<div class="stage" id="stage">
+<div class="book" id="book"></div>
+</div>
+</div>
+
+<nav class="nav" id="nav" aria-label="Pasar páginas del libro"></nav>
+
+<!-- TIENDA -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false"><defs>
+<linearGradient id="ca-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171715"/><stop offset=".45" stop-color="#2e2a22"/><stop offset=".66" stop-color="#7a5f2c"/><stop offset=".661" stop-color="#1b1a17"/><stop offset="1" stop-color="#0f0f0d"/></linearGradient>
+<radialGradient id="ca-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E3C27A" stop-opacity=".75"/><stop offset=".4" stop-color="#C5A059" stop-opacity=".28"/><stop offset="1" stop-color="#C5A059" stop-opacity="0"/></radialGradient>
+<linearGradient id="ca-foil" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F1D894"/><stop offset=".5" stop-color="#C5A059"/><stop offset="1" stop-color="#9c7a36"/></linearGradient>
+<radialGradient id="ca-vig" cx="50%" cy="46%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+<filter id="ca-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .35  0 0 0 .55 0"/></filter>
+<filter id="ca-soft"><feGaussianBlur stdDeviation="1.2"/></filter>
+<symbol id="cover-art" viewBox="0 0 600 850">
+<rect width="600" height="850" fill="url(#ca-sky)"/>
+<circle cx="300" cy="330" r="270" fill="url(#ca-glow)"/>
+<g><path d="M324 464h.1M243 443h.1M187 575h.1M543 541h.1M479 268h.1M160 321h.1M107 627h.1M527 606h.1M332 287h.1M259 262h.1M527 346h.1M181 618h.1M132 609h.1M194 506h.1M80 599h.1M243 378h.1M386 477h.1M161 290h.1M342 250h.1M508 378h.1M115 371h.1M84 367h.1" stroke="#F4DFA8" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/><path d="M324 403h.1M207 356h.1M292 551h.1M265 547h.1M290 288h.1M115 579h.1M288 393h.1M309 578h.1M230 385h.1M225 244h.1M325 432h.1M298 421h.1M285 526h.1M124 633h.1M84 587h.1M118 558h.1M166 271h.1M323 576h.1M493 591h.1M569 261h.1M232 283h.1M443 421h.1M437 558h.1" stroke="#F4DFA8" stroke-width="1.4" stroke-linecap="round" opacity="0.3"/></g>
+<g transform="translate(300 560) scale(.6) translate(-300 -560)"><g filter="url(#ca-soft)" opacity=".9"><path d="M300 560L300 630" stroke="#C5A059" stroke-width="15.0" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M300 630L332 677M300 630L271 679M300 630L296 681" stroke="#C5A059" stroke-width="10.2" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M332 677L371 698M332 677L337 718M332 677L356 712M271 679L269 725M271 679L237 704M271 679L246 715M296 681L313 714M296 681L274 713" stroke="#C5A059" stroke-width="6.9" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M371 698L406 692M371 698L389 724M337 718L352 747M337 718L323 747M356 712L384 725M356 712L365 743M269 725L278 757M269 725L248 756M237 704L226 735M237 704L204 712M246 715L243 748M246 715L214 727M313 714L337 732M313 714L312 741M274 713L270 742M274 713L251 732" stroke="#C5A059" stroke-width="4.7" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M406 692L429 680M406 692L431 705M389 724L412 734M389 724L390 750M352 747L371 764M352 747L354 772M323 747L321 772M323 747L304 766M384 725L409 728M384 725L398 743M365 743L380 762M365 743L357 768M278 757L292 779M278 757L278 782M248 756L249 786M248 756L226 775M226 735L223 759M226 735L208 754M204 712L185 729M204 712L178 709M243 748L254 771M243 748L234 770M214 727L195 748M214 727L186 729M337 732L357 738M337 732L345 752M312 741L323 758M312 741L300 757M270 742L274 765M270 742L256 760M251 732L241 752M251 732L228 738" stroke="#C5A059" stroke-width="3.2" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M429 680L440 665M429 680L450 683M431 705L455 708M431 705L444 722M412 734L432 736M412 734L425 748M390 750L399 769M390 750L382 768M371 764L388 772M371 764L378 782M354 772L364 789M354 772L347 790M321 772L326 790M321 772L313 789M304 766L297 786M304 766L287 775M409 728L427 722M409 728L424 740M398 743L412 755M398 743L402 760M380 762L396 768M380 762L385 779M357 768L357 788M357 768L344 783M292 779L308 793M292 779L298 798M278 782L288 798M278 782L273 802M249 786L262 806M249 786L239 806M226 775L217 796M226 775L204 781M223 759L226 777M223 759L216 776M208 754L205 773M208 754L193 765M185 729L177 746M185 729L167 735M178 709L160 717M178 709L162 698M254 771L270 782M254 771L255 791M234 770L234 788M234 770L221 785M195 748L187 766M195 748L177 757M186 729L169 741M186 729L168 719M357 738L374 736M357 738L367 752M345 752L359 759M345 752L342 768M323 758L335 767M323 758L325 774M300 757L297 771M300 757L284 762M274 765L284 781M274 765L271 784M256 760L249 777M256 760L240 769M241 752L241 769M241 752L230 764M228 738L214 751M228 738L210 734" stroke="#C5A059" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M440 665L445 650M440 665L451 656M450 683L466 674M450 683L463 694M455 708L472 704M455 708L471 718M444 722L458 728M444 722L447 737M432 736L448 732M432 736L446 745M425 748L438 754M425 748L431 762M399 769L412 779M399 769L399 785M382 768L385 783M382 768L370 777M388 772L402 774M388 772L397 784M378 782L387 794M378 782L376 798M364 789L377 796M364 789L364 805M347 790L346 806M347 790L336 800M326 790L336 801M326 790L327 804M313 789L313 802M313 789L303 799M297 786L303 801M297 786L286 798M287 775L277 785M287 775L274 773M427 722L439 714M427 722L442 727M424 740L439 745M424 740L430 755M412 755L425 757M412 755L419 767M402 760L409 771M402 760L397 773M396 768L411 767M396 768L405 778M385 779L392 790M385 779L380 791M357 788L363 802M357 788L350 801M344 783L340 796M344 783L329 788M308 793L322 797M308 793L314 807M298 798L309 807M298 798L293 814M288 798L300 808M288 798L289 813M273 802L275 818M273 802L263 814M262 806L277 816M262 806L263 823M239 806L241 824M239 806L224 816M217 796L216 814M217 796L205 811M204 781L193 793M204 781L186 777M226 777L233 790M226 777L219 789M216 776L214 790M216 776L204 784M205 773L209 787M205 773L198 787M193 765L183 776M193 765L178 766M177 746L179 761M177 746L165 756M167 735L155 745M167 735L152 735M160 717L148 726M160 717L145 715M162 698L147 697M162 698L153 686M270 782L284 784M270 782L278 795M255 791L263 804M255 791L247 806M234 788L238 801M234 788L226 799M221 785L214 798M221 785L207 791M187 766L188 782M187 766L176 779M177 757L164 767M177 757L161 757M169 741L163 755M169 741L154 741M168 719L152 717M168 719L157 706M374 736L385 729M374 736L386 739M367 752L379 758M367 752L367 765M359 759L371 758M359 759L366 770M342 768L345 779M342 768L335 777M335 767L345 771M335 767L339 778M325 774L333 784M325 774L320 785M297 771L298 782M297 771L292 780M284 762L277 771M284 762L273 763M284 781L296 788M284 781L288 796M271 784L275 797M271 784L265 796M249 777L249 791M249 777L240 786M240 769L233 781M240 769L228 772M241 769L247 781M241 769L237 782M230 764L226 776M230 764L219 770M214 751L208 762M214 751L200 754M210 734L196 735M210 734L199 725" stroke="#C5A059" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/><path d="M445 650L443 638M445 650L452 641M451 656L455 645M451 656L461 651M466 674L474 665M466 674L479 673M463 694L476 698M463 694L469 705M472 704L482 697M472 704L485 704M471 718L485 721M471 718L476 732M458 728L470 726M458 728L465 738M447 737L453 748M447 737L444 749M448 732L459 725M448 732L459 735M446 745L459 747M446 745L452 755M438 754L449 754M438 754L444 763M431 762L441 769M431 762L430 774M412 779L423 781M412 779L416 791M399 785L406 795M399 785L394 796M385 783L393 793M385 783L381 795M370 777L365 788M370 777L358 780M402 774L412 774M402 774L411 781M397 784L405 791M397 784L398 796M387 794L398 798M387 794L391 805M376 798L381 809M376 798L368 808M377 796L390 798M377 796L386 805M364 805L369 816M364 805L357 815M346 806L351 817M346 806L342 818M336 800L333 811M336 800L325 804M336 801L346 807M336 801L339 812M327 804L334 814M327 804L324 815M313 802L319 810M313 802L310 812M303 799L300 809M303 799L294 803M303 801L311 810M303 801L302 814M286 798L282 810M286 798L276 805M277 785L273 797M277 785L266 790M274 773L263 776M274 773L265 767M439 714L445 705M439 714L450 713M442 727L454 729M442 727L449 736M439 745L450 745M439 745L447 752M430 755L439 763M430 755L429 767M425 757L435 753M425 757L433 762M419 767L427 772M419 767L420 777M409 771L419 774M409 771L411 780M397 773L398 783M397 773L391 781M411 767L421 761M411 767L422 771M405 778L416 781M405 778L409 789M392 790L399 797M392 790L393 799M380 791L380 801M380 791L372 798M363 802L373 809M363 802L363 814M350 801L349 813M350 801L341 808M340 796L341 807M340 796L333 804M329 788L322 798M329 788L318 786M322 797L334 798M322 797L329 806M314 807L322 817M314 807L312 819M309 807L320 809M309 807L315 817M293 814L294 827M293 814L283 823M300 808L310 810M300 808L305 819M289 813L294 824M289 813L284 823M275 818L283 827M275 818L270 828M263 814L259 825M263 814L252 819M277 816L291 818M277 816L286 827M263 823L271 835M263 823L261 837M241 824L248 837M241 824L239 838M224 816L215 828M224 816L210 816M216 814L222 825M216 814L210 825M205 811L205 826M205 811L192 819M193 793L187 804M193 793L181 798M186 777L172 779M186 777L176 767M233 790L244 795M233 790L233 802M219 789L216 799M219 789L210 795M214 790L218 800M214 790L208 798M204 784L198 793M204 784L194 786M209 787L216 796M209 787L206 798M198 787L197 800M198 787L188 795M183 776L179 786M183 776L173 782M178 766L170 774M178 766L167 764M179 761L187 770M179 761L173 772M165 756L160 767M165 756L154 760M155 745L151 755M155 745L143 747M152 735L142 740M152 735L141 729M148 726L142 737M148 726L137 729M145 715L134 719M145 715L136 707M147 697L135 699M147 697L136 692M153 686L142 680M153 686L152 675M284 784L294 782M284 784L294 791M278 795L288 802M278 795L278 807M263 804L272 813M263 804L263 815M247 806L245 818M247 806L236 813M238 801L245 808M238 801L236 811M226 799L224 809M226 799L217 802M214 798L211 809M214 798L204 803M207 791L200 800M207 791L195 791M188 782L195 792M188 782L185 793M176 779L172 792M176 779L164 785M164 767L159 778M164 767L151 771M161 757L149 760M161 757L149 753M163 755L162 767M163 755L153 762M154 741L145 747M154 741L144 737M152 717L141 722M152 717L142 710M157 706L146 701M157 706L154 695M385 729L390 720M385 729L395 728M386 739L396 735M386 739L393 745M379 758L390 758M379 758L386 767M367 765L370 775M367 765L361 773M371 758L379 753M371 758L381 759M366 770L374 775M366 770L367 779M345 779L350 786M345 779L344 788M335 777L335 786M335 777L326 780M345 771L353 772M345 771L350 777M339 778L344 785M339 778L337 786M333 784L343 786M333 784L335 794M320 785L319 794M320 785L312 789M298 782L301 789M298 782L295 790M292 780L290 788M292 780L285 785M277 771L274 780M277 771L268 775M273 763L265 768M273 763L265 759M296 788L305 790M296 788L300 797M288 796L293 805M288 796L283 806M275 797L282 805M275 797L274 807M265 796L265 808M265 796L256 803M249 791L254 801M249 791L243 799M240 786L235 795M240 786L230 787M233 781L234 792M233 781L224 787M228 772L221 781M228 772L216 772M247 781L254 787M247 781L249 791M237 782L239 792M237 782L230 789M226 776L225 786M226 776L218 782M219 770L215 777M219 770L210 771M208 762L208 772M208 762L200 769M200 754L192 762M200 754L190 752M196 735L186 741M196 735L186 730M199 725L188 724M199 725L192 717" stroke="#C5A059" stroke-width="1.0" stroke-linecap="round" fill="none" opacity="0.6"/></g><g><path d="M483 678h.1M510 689h.1M528 723h.1M520 729h.1M520 763h.1M501 788h.1M522 757h.1M524 778h.1M510 780h.1M500 808h.1M475 824h.1M493 787h.1M499 819h.1M484 840h.1M474 852h.1M469 864h.1M464 834h.1M456 869h.1M434 878h.1M418 887h.1M377 880h.1M362 861h.1M465 800h.1M468 817h.1M461 839h.1M440 864h.1M420 874h.1M453 848h.1M434 885h.1M401 890h.1M378 899h.1M350 896h.1M396 863h.1M378 889h.1M370 898h.1M338 895h.1M317 885h.1M301 867h.1M313 893h.1M283 886h.1M284 882h.1M257 857h.1M256 823h.1M493 761h.1M503 795h.1M491 822h.1M489 845h.1M471 859h.1M474 833h.1M463 865h.1M448 883h.1M433 888h.1M406 889h.1M380 871h.1M472 839h.1M459 865h.1M457 868h.1M431 892h.1M414 898h.1M411 891h.1M381 898h.1M356 889h.1M354 903h.1M336 891h.1M383 817h.1M384 853h.1M376 865h.1M368 866h.1M351 890h.1M326 892h.1M346 888h.1M311 902h.1M296 903h.1M269 904h.1M248 891h.1M303 886h.1M291 899h.1M264 904h.1M235 901h.1M218 890h.1M242 886h.1M213 888h.1M193 876h.1M197 869h.1M182 845h.1M181 824h.1M311 870h.1M309 878h.1M269 907h.1M236 911h.1M210 908h.1M214 912h.1M196 913h.1M163 892h.1M141 875h.1M128 824h.1M215 875h.1M182 886h.1M150 877h.1M130 860h.1M122 848h.1M116 813h.1M115 854h.1M100 834h.1M102 817h.1M94 782h.1M113 758h.1M325 890h.1M301 920h.1M277 928h.1M248 931h.1M224 922h.1M264 920h.1M234 933h.1M206 923h.1M201 912h.1M168 886h.1M169 847h.1M262 892h.1M238 904h.1M230 895h.1M198 900h.1M176 874h.1M192 889h.1M165 876h.1M150 850h.1M138 838h.1M147 795h.1" stroke="#C5A059" stroke-width="3" stroke-linecap="round" opacity="0.35"/></g></g>
+<line x1="0" y1="560" x2="600" y2="560" stroke="#E3C27A" stroke-width="1.2" opacity=".8"/>
+<g transform="translate(300 560) scale(.7) translate(-300 -560)"><g><path d="M300 560L300 464" stroke="#0d0d0b" stroke-width="15.0" stroke-linecap="round" fill="none" opacity="1"/><path d="M300 464L339 401M300 464L275 398" stroke="#0d0d0b" stroke-width="10.2" stroke-linecap="round" fill="none" opacity="1"/><path d="M339 401L386 369M339 401L354 350M339 401L372 354M275 398L274 345M275 398L241 354M275 398L253 344" stroke="#0d0d0b" stroke-width="6.9" stroke-linecap="round" fill="none" opacity="1"/><path d="M386 369L427 368M386 369L405 332M354 350L379 319M354 350L345 311M372 354L405 328M372 354L384 314M274 345L293 308M274 345L260 308M241 354L231 310M241 354L201 332M253 344L249 297M253 344L227 311" stroke="#0d0d0b" stroke-width="4.7" stroke-linecap="round" fill="none" opacity="1"/><path d="M427 368L459 376M427 368L455 354M405 332L433 314M405 332L408 301M379 319L407 306M379 319L390 289M345 311L348 282M345 311L322 289M405 328L436 319M405 328L418 298M384 314L408 293M384 314L378 282M293 308L320 290M293 308L296 277M260 308L260 276M260 308L238 288M231 310L247 279M231 310L206 283M201 332L182 304M201 332L166 324M249 297L260 264M249 297L232 266M227 311L226 280M227 311L200 295" stroke="#0d0d0b" stroke-width="3.2" stroke-linecap="round" fill="none" opacity="1"/><path d="M459 376L480 393M459 376L484 371M455 354L479 353M455 354L469 337M433 314L457 314M433 314L448 296M408 301L423 282M408 301L401 277M407 306L429 306M407 306L421 288M390 289L411 273M390 289L383 264M348 282L360 263M348 282L337 264M322 289L311 267M322 289L297 281M436 319L460 325M436 319L452 300M418 298L436 282M418 298L413 274M408 293L430 285M408 293L418 269M378 282L382 259M378 282L363 260M320 290L344 284M320 290L332 269M296 277L307 256M296 277L284 255M260 276L271 256M260 276L248 257M238 288L228 268M238 288L217 283M247 279L269 266M247 279L243 251M206 283L199 255M206 283L179 277M182 304L184 277M182 304L159 293M166 324L145 307M166 324L140 327M260 264L279 243M260 264L254 237M232 266L231 237M232 266L208 253M226 280L237 259M226 280L214 259M200 295L189 274M200 295L177 297" stroke="#0d0d0b" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="1"/><path d="M480 393L486 413M480 393L500 396M484 371L500 379M484 371L496 357M479 353L498 359M479 353L497 346M469 337L486 333M469 337L475 321M457 314L473 320M457 314L473 304M448 296L462 286M448 296L453 278M423 282L441 273M423 282L429 265M401 277L404 256M401 277L386 265M429 306L445 312M429 306L445 302M421 288L435 278M421 288L423 271M411 273L429 270M411 273L415 254M383 264L384 244M383 264L367 249M360 263L373 253M360 263L365 245M337 264L337 247M337 264L323 255M311 267L315 250M311 267L297 255M297 281L283 266M297 281L278 284M460 325L476 338M460 325L479 320M452 300L470 293M452 300L458 282M436 282L453 276M436 282L442 263M413 274L419 255M413 274L403 257M430 285L448 287M430 285L440 271M418 269L430 253M418 269L421 249M382 259L392 244M382 259L375 244M363 260L360 241M363 260L347 249M344 284L364 286M344 284L361 274M332 269L347 260M332 269L336 251M307 256L324 248M307 256L308 239M284 255L283 237M284 255L270 242M271 256L284 245M271 256L273 238M248 257L246 240M248 257L233 247M228 268L227 251M228 268L213 256M217 283L207 271M217 283L201 284M269 266L287 261M269 266L284 254M243 251L251 232M243 251L233 232M199 255L202 234M199 255L189 236M179 277L164 262M179 277L158 287M184 277L192 259M184 277L173 260M159 293L146 280M159 293L138 292M145 307L133 288M145 307L125 300M140 327L119 324M140 327L125 340M279 243L298 234M279 243L282 221M254 237L257 217M254 237L240 222M231 237L240 217M231 237L224 217M208 253L200 234M208 253L187 253M237 259L251 248M237 259L236 241M214 259L214 241M214 259L199 249M189 274L186 256M189 274L173 266M177 297L161 289M177 297L165 309" stroke="#0d0d0b" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="1"/><path d="M486 413L486 430M486 413L498 425M500 396L514 403M500 396L517 393M500 379L510 388M500 379L513 381M496 357L510 354M496 357L501 343M498 359L509 370M498 359L512 358M497 346L513 347M497 346L508 336M486 333L500 334M486 333L496 323M475 321L485 312M475 321L472 307M473 320L483 330M473 320L487 319M473 304L488 300M473 304L481 291M462 286L475 285M462 286L467 275M453 278L463 267M453 278L452 263M441 273L455 277M441 273L451 261M429 265L437 253M429 265L428 251M404 256L413 244M404 256L401 240M386 265L377 252M386 265L373 259M445 312L454 323M445 312L458 313M445 302L458 305M445 302L457 295M435 278L449 278M435 278L442 266M423 271L429 260M423 271L418 257M429 270L442 272M429 270L441 262M415 254L425 242M415 254L411 238M384 244L391 232M384 244L378 231M367 249L361 233M367 249L351 243M373 253L387 251M373 253L379 241M365 245L374 236M365 245L365 231M337 247L341 235M337 247L331 235M323 255L318 244M323 255L311 251M315 250L322 238M315 250L310 237M297 255L291 241M297 255L282 252M283 266L280 250M283 266L268 261M278 284L263 281M278 284L267 293M476 338L483 352M476 338L490 341M479 320L493 320M479 320L490 309M470 293L485 296M470 293L480 281M458 282L467 271M458 282L455 270M453 276L467 280M453 276L461 265M442 263L453 252M442 263L442 247M419 255L430 244M419 255L415 240M403 257L403 242M403 257L391 249M448 287L460 295M448 287L461 281M440 271L453 264M440 271L445 257M430 253L446 249M430 253L433 239M421 249L432 237M421 249L414 234M392 244L405 238M392 244L392 231M375 244L375 230M375 244L365 235M360 241L367 228M360 241L354 227M347 249L344 235M347 249L333 246M364 286L376 294M364 286L378 277M361 274L376 271M361 274L368 261M347 260L359 259M347 260L353 249M336 251L343 238M336 251L333 237M324 248L338 246M324 248L335 237M308 239L312 227M308 239L302 227M283 237L288 224M283 237L277 224M270 242L269 227M270 242L257 236M284 245L296 241M284 245L288 234M273 238L282 227M273 238L270 224M246 240L250 227M246 240L237 230M233 247L226 236M233 247L221 245M227 251L233 239M227 251L221 238M213 256L206 243M213 256L199 252M207 271L203 258M207 271L195 265M201 284L189 280M201 284L189 289M287 261L302 261M287 261L299 252M284 254L299 250M284 254L288 239M251 232L260 220M251 232L246 217M233 232L229 216M233 232L218 223M202 234L212 221M202 234L199 217M189 236L188 219M189 236L175 227M164 262L161 246M164 262L148 255M158 287L139 288M158 287L146 299M192 259L203 248M192 259L190 243M173 260L171 244M173 260L158 253M146 280L140 266M146 280L132 275M138 292L127 282M138 292L124 298M133 288L132 271M133 288L121 277M125 300L113 288M125 300L108 302M119 324L108 314M119 324L103 328M125 340L111 344M125 340L120 353M298 234L314 234M298 234L310 223M282 221L290 206M282 221L281 204M257 217L265 204M257 217L249 202M240 222L235 206M240 222L226 215M240 217L252 206M240 217L238 199M224 217L227 201M224 217L211 208M200 234L203 219M200 234L190 223M187 253L173 245M187 253L174 263M251 248L265 245M251 248L256 236M236 241L240 227M236 241L228 228M214 241L221 229M214 241L208 228M199 249L191 238M199 249L186 250M186 256L191 243M186 256L177 243M173 266L166 254M173 266L159 264M161 289L154 277M161 289L147 287M165 309L153 316M165 309L161 322" stroke="#0d0d0b" stroke-width="1.0" stroke-linecap="round" fill="none" opacity="1"/><path d="M486 430L483 442M486 430L490 442M498 425L502 437M498 425L510 431M514 403L520 413M514 403L525 405M517 393L528 397M517 393L528 387M510 388L513 398M510 388L520 391M513 381L522 386M513 381L522 378M510 354L520 357M510 354L517 346M501 343L509 335M501 343L501 332M509 370L511 382M509 370L521 375M512 358L522 363M512 358L522 354M513 347L525 351M513 347L524 342M508 336L519 333M508 336L511 325M500 334L510 340M500 334L511 332M496 323L507 322M496 323L500 312M485 312L494 309M485 312L489 302M472 307L475 296M472 307L467 298M483 330L485 341M483 330L493 333M487 319L497 323M487 319L498 315M488 300L499 301M488 300L496 292M481 291L489 282M481 291L484 280M475 285L484 288M475 285L484 280M467 275L474 268M467 275L468 265M463 267L474 263M463 267L469 256M452 263L457 253M452 263L445 253M455 277L464 286M455 277L466 274M451 261L462 255M451 261L456 251M437 253L448 250M437 253L440 244M428 251L434 242M428 251L423 243M413 244L424 238M413 244L418 233M401 240L404 229M401 240L393 230M377 252L377 240M377 252L367 244M373 259L364 252M373 259L362 259M454 323L455 334M454 323L463 327M458 313L465 320M458 313L467 311M458 305L466 310M458 305L468 303M457 295L467 294M457 295L462 287M449 278L461 281M449 278L459 274M442 266L450 259M442 266L440 256M429 260L438 255M429 260L428 250M418 257L420 246M418 257L410 250M442 272L451 279M442 272L453 272M441 262L453 261M441 262L448 252M425 242L434 235M425 242L429 230M411 238L415 226M411 238L401 230M391 232L401 227M391 232L391 222M378 231L378 221M378 231L370 225M361 233L363 219M361 233L350 224M351 243L343 232M351 243L339 245M387 251L396 257M387 251L398 248M379 241L387 235M379 241L378 231M374 236L383 231M374 236L378 227M365 231L370 222M365 231L361 221M341 235L349 228M341 235L338 225M331 235L330 224M331 235L324 228M318 244L317 235M318 244L310 239M311 251L303 246M311 251L301 253M322 238L331 233M322 238L324 228M310 237L313 227M310 237L304 229M291 241L292 230M291 241L283 234M282 252L273 246M282 252L271 257M280 250L284 238M280 250L272 240M268 261L260 252M268 261L257 263M263 281L254 275M263 281L252 285M267 293L256 297M267 293L262 303M483 352L484 364M483 352L493 359M490 341L497 350M490 341L501 341M493 320L503 325M493 320L503 316M490 309L501 304M490 309L491 298M485 296L494 303M485 296L496 291M480 281L489 275M480 281L483 269M467 271L478 269M467 271L471 261M455 270L460 261M455 270L449 262M467 280L474 287M467 280L478 278M461 265L471 262M461 265L463 255M453 252L464 250M453 252L457 242M442 247L448 237M442 247L437 236M430 244L442 241M430 244L433 232M415 240L418 228M415 240L407 233M403 242L406 231M403 242L399 232M391 249L388 238M391 249L380 249M460 295L466 305M460 295L471 294M461 281L472 281M461 281L469 274M453 264L464 263M453 264L459 255M445 257L453 250M445 257L443 246M446 249L457 252M446 249L455 242M433 239L441 231M433 239L431 228M432 237L443 233M432 237L435 226M414 234L414 222M414 234L404 227M405 238L416 237M405 238L411 229M392 231L396 220M392 231L388 221M375 230L381 222M375 230L371 220M365 235L362 226M365 235L356 231M367 228L376 220M367 228L367 216M354 227L354 217M354 227L346 219M344 235L346 225M344 235L336 229M333 246L325 239M333 246L322 249M376 294L383 303M376 294L386 296M378 277L390 276M378 277L384 267M376 271L387 274M376 271L386 265M368 261L376 255M368 261L366 251M359 259L369 261M359 259L368 254M353 249L360 243M353 249L355 240M343 238L351 230M343 238L343 227M333 237L336 226M333 237L326 228M338 246L348 250M338 246L348 241M335 237L346 232M335 237L337 225M312 227L321 221M312 227L311 218M302 227L302 217M302 227L296 221M288 224L296 217M288 224L288 213M277 224L278 212M277 224L269 216M269 227L272 217M269 227L262 218M257 236L248 229M257 236L246 235M296 241L306 242M296 241L303 234M288 234L295 227M288 234L287 224M282 227L291 221M282 227L282 215M270 224L271 213M270 224L264 216M250 227L258 221M250 227L247 218M237 230L235 219M237 230L226 228M226 236L223 226M226 236L218 230M221 245L213 240M221 245L212 248M233 239L242 234M233 239L233 229M221 238L219 227M221 238L213 232M206 243L205 231M206 243L195 239M199 252L193 244M199 252L188 254M203 258L207 248M203 258L197 251M195 265L188 258M195 265L184 265M189 280L182 275M189 280L181 283M189 289L178 289M189 289L181 296M302 261L312 265M302 261L312 259M299 252L311 250M299 252L303 241M299 250L311 250M299 250L309 242M288 239L295 229M288 239L285 228M260 220L269 213M260 220L262 208M246 217L248 205M246 217L236 209M229 216L234 204M229 216L223 205M218 223L210 212M218 223L205 223M212 221L222 214M212 221L214 208M199 217L203 204M199 217L188 208M188 219L196 207M188 219L183 207M175 227L169 216M175 227L163 228M161 246L166 233M161 246L155 235M148 255L141 245M148 255L135 253M139 288L126 282M139 288L128 296M146 299L134 303M146 299L140 311M203 248L215 245M203 248L208 237M190 243L193 232M190 243L182 234M171 244L175 233M171 244L163 235M158 253L150 243M158 253L145 253M140 266L141 254M140 266L130 260M132 275L124 267M132 275L120 277M127 282L122 272M127 282L117 278M124 298L113 297M124 298L116 307M132 271L138 259M132 271L125 260M121 277L115 266M121 277L109 275M113 288L108 277M113 288L100 286M108 302L95 299M108 302L96 309M108 314L102 303M108 314L98 308M103 328L90 323M103 328L94 338M111 344L100 342M111 344L104 353M120 353L113 362M120 353L121 365M314 234L326 238M314 234L325 230M310 223L321 222M310 223L315 212M290 206L301 200M290 206L289 193M281 204L288 193M281 204L277 192M265 204L276 200M265 204L267 193M249 202L248 189M249 202L237 196M235 206L237 193M235 206L224 198M226 215L218 206M226 215L215 214M252 206L264 200M252 206L258 194M238 199L245 187M238 199L234 187M227 201L234 189M227 201L224 189M211 208L206 197M211 208L199 206M203 219L209 209M203 219L201 208M190 223L186 212M190 223L178 221M173 245L168 234M173 245L161 242M174 263L162 265M174 263L169 273M265 245L276 246M265 245L273 238M256 236L262 228M256 236L255 226M240 227L247 220M240 227L238 216M228 228L229 216M228 228L219 220M221 229L230 225M221 229L224 219M208 228L208 217M208 228L198 220M191 238L190 228M191 238L182 234M186 250L176 246M186 250L177 255M191 243L199 235M191 243L192 231M177 243L177 232M177 243L167 238M166 254L165 244M166 254L157 249M159 264L152 257M159 264L150 270M154 277L151 266M154 277L146 270M147 287L138 282M147 287L137 290M153 316L143 316M153 316L147 325M161 322L153 328M161 322L160 333" stroke="#0d0d0b" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="1"/></g><g><path d="M478 443h.1M492 434h.1M497 432h.1M516 431h.1M523 419h.1M528 397h.1M525 389h.1M532 394h.1M511 403h.1M527 383h.1M530 385h.1M523 375h.1M521 364h.1M523 355h.1M515 343h.1M505 326h.1M507 374h.1M513 381h.1M518 368h.1M524 346h.1M532 360h.1M521 334h.1M514 331h.1M503 332h.1M517 338h.1M513 334h.1M515 322h.1M496 309h.1M495 301h.1M481 304h.1M477 295h.1M471 302h.1M488 349h.1M494 330h.1M495 325h.1M503 306h.1M495 296h.1M490 291h.1M486 279h.1M491 274h.1M491 287h.1M484 275h.1M468 264h.1M473 263h.1M480 258h.1M468 255h.1M449 261h.1M444 261h.1M469 292h.1M462 271h.1M464 251h.1M464 254h.1M456 251h.1M435 240h.1M432 250h.1M418 249h.1M421 233h.1M412 238h.1M410 220h.1M385 226h.1M376 240h.1M359 237h.1M373 258h.1M359 256h.1M457 331h.1M456 328h.1M457 314h.1M473 309h.1M464 308h.1M467 306h.1M467 297h.1M461 293h.1M468 286h.1M453 280h.1M455 263h.1M433 258h.1M443 247h.1M435 244h.1M413 252h.1M418 251h.1M456 279h.1M457 280h.1M454 267h.1M443 254h.1M432 233h.1M421 230h.1M419 219h.1M404 230h.1M408 221h.1M399 222h.1M373 217h.1M366 220h.1M359 223h.1M352 219h.1M342 230h.1M336 250h.1M396 259h.1M404 249h.1M393 233h.1M378 227h.1M386 240h.1M373 223h.1M376 229h.1M358 219h.1M342 234h.1M340 228h.1M329 224h.1M332 226h.1M313 238h.1M317 232h.1M307 251h.1M304 258h.1M339 236h.1M324 225h.1M314 222h.1M298 236h.1M300 224h.1M285 235h.1M269 240h.1M275 258h.1M280 236h.1M272 236h.1M257 250h.1M254 269h.1M247 268h.1M246 279h.1M262 301h.1M260 297h.1M479 360h.1M499 366h.1M498 351h.1M505 337h.1M505 329h.1M506 316h.1M495 304h.1M494 297h.1M501 296h.1M488 288h.1M490 283h.1M487 263h.1M485 273h.1M477 269h.1M465 261h.1M442 257h.1M478 288h.1M474 278h.1M465 269h.1M461 256h.1M455 245h.1M456 236h.1M446 231h.1M431 236h.1M441 239h.1M431 230h.1M413 221h.1M409 230h.1M410 227h.1M407 228h.1M394 240h.1M383 257h.1M457 298h.1M463 297h.1M480 281h.1M477 266h.1M472 256h.1M452 253h.1M461 244h.1M450 247h.1M456 247h.1M451 236h.1M444 229h.1M435 220h.1M447 225h.1M438 233h.1M421 226h.1M397 225h.1M417 230h.1M406 221h.1M398 212h.1M383 222h.1M383 227h.1M365 212h.1M353 234h.1M348 230h.1M378 223h.1M364 218h.1M360 218h.1M347 219h.1M343 225h.1M340 227h.1M319 236h.1M320 241h.1M391 307h.1M388 304h.1M398 284h.1M389 266h.1M383 282h.1M390 261h.1M368 259h.1M363 255h.1M361 257h.1M362 258h.1M369 250h.1M351 239h.1M349 237h.1M350 232h.1M341 217h.1M326 222h.1M353 249h.1M356 233h.1M344 230h.1M330 222h.1M319 217h.1M313 221h.1M298 211h.1M296 227h.1M290 208h.1M295 213h.1M284 214h.1M263 210h.1M273 215h.1M268 217h.1M245 229h.1M252 243h.1M307 243h.1M307 241h.1M292 227h.1M290 219h.1M289 227h.1M290 223h.1M267 206h.1M256 211h.1M259 225h.1M253 209h.1M227 215h.1M227 220h.1M217 234h.1M221 233h.1M218 234h.1M219 240h.1M240 227h.1M229 222h.1M217 235h.1M221 241h.1M203 239h.1M192 231h.1M198 245h.1M187 255h.1M208 256h.1M206 257h.1M183 250h.1M191 258h.1M187 284h.1M185 276h.1M172 291h.1M179 293h.1M321 273h.1M309 267h.1M311 254h.1M300 249h.1M311 257h.1M307 244h.1M301 234h.1M283 236h.1M270 220h.1M265 206h.1M246 203h.1M237 202h.1M236 197h.1M219 196h.1M211 217h.1M213 222h.1M229 212h.1M211 203h.1M195 196h.1M194 202h.1M196 206h.1M182 200h.1M162 215h.1M155 219h.1M173 239h.1M156 242h.1M134 247h.1M136 255h.1M125 289h.1M136 299h.1M130 310h.1M142 308h.1M221 249h.1M207 234h.1M188 238h.1M190 232h.1M166 233h.1M169 227h.1M145 239h.1M142 246h.1M143 249h.1M133 262h.1M122 267h.1M119 269h.1M122 273h.1M120 273h.1M110 306h.1M120 304h.1M130 260h.1M125 267h.1M116 272h.1M113 276h.1M115 277h.1M104 282h.1M99 296h.1M92 313h.1M95 304h.1M92 306h.1M92 316h.1M89 338h.1M101 350h.1M102 345h.1M121 355h.1M120 360h.1M327 238h.1M334 235h.1M314 225h.1M314 220h.1M295 203h.1M287 199h.1M291 191h.1M278 194h.1M270 202h.1M267 201h.1M245 181h.1M245 190h.1M241 193h.1M225 201h.1M212 208h.1M206 207h.1M263 208h.1M261 185h.1M239 179h.1M242 180h.1M239 188h.1M219 189h.1M202 196h.1M200 207h.1M200 200h.1M203 204h.1M189 216h.1M175 213h.1M161 242h.1M160 235h.1M159 274h.1M168 269h.1M267 245h.1M280 245h.1M259 228h.1M249 228h.1M239 229h.1M242 216h.1M232 209h.1M228 212h.1M237 224h.1M222 218h.1M204 221h.1M194 218h.1M198 228h.1M174 229h.1M171 241h.1M177 250h.1M196 234h.1M196 228h.1M172 227h.1M170 242h.1M165 242h.1M151 247h.1M159 251h.1M153 279h.1M159 259h.1M142 276h.1M132 277h.1M134 289h.1M135 324h.1M156 321h.1M149 323h.1M168 330h.1" stroke="#E3C27A" stroke-width="5" stroke-linecap="round" opacity="0.75"/><path d="M481 444h.1M481 448h.1M511 436h.1M512 425h.1M521 417h.1M530 406h.1M535 397h.1M532 395h.1M512 406h.1M513 386h.1M524 383h.1M520 379h.1M523 365h.1M520 340h.1M516 336h.1M507 333h.1M517 391h.1M519 369h.1M528 355h.1M526 351h.1M525 360h.1M526 334h.1M521 327h.1M508 334h.1M509 341h.1M512 334h.1M506 326h.1M509 313h.1M493 311h.1M492 294h.1M478 293h.1M459 290h.1M481 340h.1M490 330h.1M494 321h.1M499 319h.1M504 296h.1M499 285h.1M495 281h.1M481 283h.1M479 281h.1M489 286h.1M480 271h.1M461 262h.1M472 261h.1M477 250h.1M464 262h.1M453 248h.1M467 287h.1M461 266h.1M468 247h.1M464 258h.1M440 254h.1M443 244h.1M436 239h.1M422 248h.1M424 244h.1M426 239h.1M407 236h.1M389 231h.1M382 231h.1M360 236h.1M357 252h.1M359 262h.1M450 331h.1M467 325h.1M463 322h.1M473 313h.1M466 314h.1M468 298h.1M459 292h.1M470 284h.1M456 280h.1M462 281h.1M454 261h.1M432 250h.1M431 248h.1M420 256h.1M423 252h.1M415 241h.1M455 272h.1M445 269h.1M449 255h.1M452 250h.1M431 234h.1M437 229h.1M418 230h.1M401 232h.1M394 232h.1M390 226h.1M373 222h.1M373 233h.1M361 226h.1M345 215h.1M337 230h.1M333 254h.1M396 263h.1M398 252h.1M391 243h.1M374 235h.1M390 227h.1M373 231h.1M366 228h.1M365 213h.1M345 226h.1M330 222h.1M325 226h.1M325 221h.1M310 242h.1M318 237h.1M299 249h.1M297 258h.1M331 226h.1M328 231h.1M316 230h.1M307 222h.1M289 234h.1M286 233h.1M265 250h.1M275 254h.1M291 230h.1M277 238h.1M261 257h.1M250 259h.1M259 279h.1M250 289h.1M258 290h.1M263 304h.1M489 356h.1M502 357h.1M500 359h.1M508 340h.1M494 330h.1M504 315h.1M492 304h.1M492 306h.1M499 305h.1M491 283h.1M486 282h.1M490 271h.1M482 266h.1M478 260h.1M453 253h.1M443 262h.1M473 290h.1M483 277h.1M475 259h.1M465 250h.1M469 244h.1M451 236h.1M440 230h.1M429 227h.1M445 233h.1M424 240h.1M417 222h.1M400 225h.1M411 230h.1M395 227h.1M385 231h.1M381 240h.1M460 297h.1M478 289h.1M477 289h.1M465 276h.1M460 269h.1M456 258h.1M457 254h.1M451 244h.1M463 252h.1M459 244h.1M440 225h.1M431 233h.1M439 239h.1M442 225h.1M411 220h.1M413 220h.1M408 240h.1M405 232h.1M391 229h.1M387 226h.1M382 216h.1M377 213h.1M356 233h.1M351 237h.1M381 227h.1M366 209h.1M359 211h.1M350 212h.1M338 226h.1M338 231h.1M334 236h.1M317 243h.1M390 312h.1M387 295h.1M398 276h.1M393 275h.1M381 267h.1M386 267h.1M372 254h.1M370 247h.1M367 253h.1M372 262h.1M358 237h.1M355 240h.1M348 230h.1M339 222h.1M329 226h.1M318 222h.1M357 255h.1M342 233h.1M337 233h.1M333 231h.1M312 220h.1M319 223h.1M307 223h.1M297 217h.1M299 224h.1M291 221h.1M277 212h.1M272 224h.1M269 216h.1M270 212h.1M247 235h.1M248 227h.1M305 238h.1M296 237h.1M302 235h.1M295 219h.1M288 216h.1M279 213h.1M267 221h.1M258 208h.1M264 223h.1M244 226h.1M234 215h.1M222 236h.1M218 235h.1M212 222h.1M207 245h.1M221 249h.1M240 243h.1M226 222h.1M212 222h.1M222 227h.1M205 235h.1M192 244h.1M192 244h.1M194 249h.1M213 243h.1M191 246h.1M197 256h.1M176 272h.1M185 276h.1M181 282h.1M175 289h.1M179 298h.1M318 271h.1M308 252h.1M308 253h.1M303 240h.1M319 251h.1M301 240h.1M287 235h.1M283 223h.1M268 220h.1M258 208h.1M251 212h.1M230 206h.1M226 200h.1M224 212h.1M216 218h.1M209 216h.1M222 221h.1M220 210h.1M200 195h.1M184 206h.1M198 210h.1M192 211h.1M174 225h.1M162 227h.1M163 232h.1M149 233h.1M133 253h.1M128 249h.1M126 278h.1M128 291h.1M127 303h.1M145 318h.1M209 237h.1M202 244h.1M201 225h.1M177 228h.1M173 239h.1M162 233h.1M146 247h.1M140 252h.1M145 248h.1M124 265h.1M126 269h.1M126 283h.1M118 279h.1M123 286h.1M113 292h.1M121 309h.1M144 259h.1M124 260h.1M109 259h.1M105 282h.1M117 283h.1M91 289h.1M95 300h.1M97 307h.1M99 308h.1M92 306h.1M82 323h.1M88 331h.1M107 343h.1M100 350h.1M121 361h.1M129 359h.1M321 233h.1M329 237h.1M326 217h.1M312 216h.1M297 201h.1M294 193h.1M293 188h.1M275 184h.1M271 204h.1M273 197h.1M249 193h.1M231 204h.1M241 187h.1M226 192h.1M225 200h.1M220 213h.1M266 195h.1M254 198h.1M246 184h.1M239 185h.1M237 186h.1M229 187h.1M199 194h.1M201 203h.1M206 204h.1M206 210h.1M186 211h.1M184 221h.1M170 236h.1M170 236h.1M155 265h.1M176 272h.1M267 249h.1M265 241h.1M259 225h.1M248 234h.1M242 213h.1M242 216h.1M232 216h.1M212 224h.1M234 226h.1M226 210h.1M204 216h.1M201 225h.1M184 225h.1M184 236h.1M169 241h.1M184 256h.1M191 239h.1M196 227h.1M172 234h.1M160 243h.1M165 243h.1M159 253h.1M159 262h.1M143 275h.1M153 274h.1M153 269h.1M144 281h.1M145 285h.1M140 314h.1M140 331h.1M161 324h.1M157 328h.1" stroke="#F4DFA8" stroke-width="3" stroke-linecap="round" opacity="0.5"/></g></g>
+<g transform="translate(392 558)" fill="#0d0d0b"><circle cx="0" cy="-58" r="7.5"/><path d="M-9 -49 Q0 -53 9 -49 L12 -8 L-12 -8Z"/><rect x="-9" y="-8" width="7" height="8"/><rect x="2" y="-8" width="7" height="8"/></g>
+<rect width="600" height="850" fill="url(#ca-vig)"/>
+<text x="300" y="108" text-anchor="middle" font-family="Jost,sans-serif" font-size="15" letter-spacing="6" fill="#E3C27A" opacity=".9">MÉTODO KAROLYTST</text>
+<text x="300" y="178" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-weight="500" font-size="68" fill="#FDFBF7">Salir del modo</text>
+<text x="300" y="248" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-style="italic" font-weight="500" font-size="76" fill="url(#ca-foil)">supervivencia</text>
+<line x1="250" y1="728" x2="350" y2="728" stroke="url(#ca-foil)" stroke-width="1"/>
+<text x="300" y="758" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-style="italic" font-size="25" fill="#e8dfca">Ordena tu historia familiar</text>
+<text x="300" y="788" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-style="italic" font-size="25" fill="#e8dfca">y devuelve a tu cuerpo la calma</text>
+<text x="300" y="830" text-anchor="middle" font-family="Jost,sans-serif" font-size="19" letter-spacing="7" fill="url(#ca-foil)">KAROL</text>
+<rect width="600" height="850" filter="url(#ca-grain)" opacity=".35" style="mix-blend-mode:overlay"/>
+</symbol></defs></svg>
+<section class="shop" id="tienda" aria-labelledby="sh-h">
+  <div class="wrap">
+    <span class="sh-eyebrow">Libro digital · Acceso inmediato</span>
+    <h2 id="sh-h">Llévate tu libro y tus <em>tres llaves</em></h2>
+    <div class="sh-grid">
+      <div class="sh-stage" id="sh-stage" tabindex="0" role="group" aria-label="Libro en 3D. Arrastra o usa las flechas para girarlo">
+        <span class="sh-badge">Edición digital · PDF</span>
+        <div class="sh-comp">
+          <div class="sh-floor"></div>
+          <div class="sh-persp" id="sh-persp">
+            <div class="bk" id="bk">
+              <div class="fr"><svg viewBox="0 0 600 850" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Portada: Salir del modo supervivencia, de Karol"><use href="#cover-art" width="600" height="850"/></svg></div>
+              <div class="bc"><p>Dejar de analizar de dónde vienes empieza por ocupar <em>tu propio lugar</em>.</p><span>Una guía práctica para soltar cargas heredadas, bajar la guardia y mirar tu historia con respeto, sin cortar con nadie.</span><u>Método KarolyTST</u></div>
+              <div class="sp"><span>Salir del modo supervivencia <em>KAROL</em></span></div>
+              <div class="pg3"></div><div class="pt"></div><div class="pb"></div>
+            </div>
+          </div>
+          <div class="sh-tab" aria-hidden="true"><div class="scr"><svg viewBox="0 0 600 850" preserveAspectRatio="xMidYMid slice"><use href="#cover-art" width="600" height="850"/></svg></div></div>
+        </div>
+        <div class="sh-bonus" aria-hidden="true">
+          <div class="bn"><svg viewBox="0 0 34 34"><rect x="7" y="4" width="20" height="26" rx="2"/><path d="M12 10h10M12 15h10M12 20h6"/></svg><div><b>Cuaderno de ruta</b><small>21 días</small></div><u>Llave 1</u></div>
+          <div class="bn"><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="12"/><path d="M14 12l8 5-8 5z"/></svg><div><b>3 audios de bolsillo</b><small>5 a 7 minutos</small></div><u>Llave 2</u></div>
+          <div class="bn"><svg viewBox="0 0 34 34"><path d="M17 5l12 20H5z"/><path d="M17 5v20"/></svg><div><b>Mapa de posición</b><small>8 tarjetas</small></div><u>Llave 3</u></div>
+        </div>
+        <div class="sh-tools"><button type="button" id="sh-flip" aria-pressed="false">Ver contraportada</button><span>o arrastra para girarlo</span></div>
+      </div>
+      <div class="sh-panel">
+        <h3>Salir del modo supervivencia</h3>
+        <p class="au">Método KarolyTST · Carolina Muñoz Conde</p>
+        <ul class="sh-list">
+          <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>El libro, 11 capítulos en 4 bloques</span><s>47 €</s></li>
+          <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Cuaderno de ruta de 21 días</span><s>19 €</s></li>
+          <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>3 audios de bolsillo</span><s>15 €</s></li>
+          <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg><span>Mapa de posición y 8 tarjetas</span><s>12 €</s></li>
+        </ul>
+        <div class="sh-price"><b>19 €</b><s>Valor 93 €</s><span>Pago único</span></div>
+        <a class="sh-buy" href="#tienda" id="sh-buy"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg>Comprar ahora</a>
+        <ul class="sh-pay" aria-label="Métodos de pago disponibles"><li>Tarjeta</li><li>PayPal</li><li>Bizum</li><li>Apple Pay</li><li>Google Pay</li><li class="mini">Visa · Mastercard · Amex</li></ul>
+        <div class="sh-sec"><span>Pago seguro</span><span>Descarga inmediata</span><span>Móvil, tablet y ordenador</span></div>
+        <div class="sh-guar"><i aria-hidden="true">7</i><p style="margin:0"><b>7 días de garantía.</b> Si no es para ti, te devolvemos el 100% sin preguntas.</p></div>
+      </div>
+    </div>
+    <div class="sh-steps">
+      <div><b>Pagas</b>En una ventana segura, con tu método habitual.</div>
+      <div><b>Lo recibes</b>Te llega un email con el acceso para descargar todo.</div>
+      <div><b>Empiezas hoy</b>Cinco minutos al día son suficientes.</div>
+    </div>
+  </div>
+</section>
+<div class="co" id="co" hidden>
+  <div class="co-bg" data-close></div>
+  <div class="co-dlg" role="dialog" aria-modal="true" aria-labelledby="co-t" tabindex="-1">
+    <button type="button" class="co-x" data-close aria-label="Cerrar la compra"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16"/></svg></button>
+    <p class="co-demo">Prototipo de demostración: no se cobra nada ni se guarda ningún dato.</p>
+    <div id="co-form">
+      <div class="co-cols">
+        <aside class="co-sum">
+          <div class="bkm" aria-hidden="true"><svg viewBox="0 0 600 850" preserveAspectRatio="xMidYMid slice"><use href="#cover-art" width="600" height="850"/></svg></div>
+          <div><h3>Salir del modo supervivencia</h3><p>Libro digital y tres llaves</p></div>
+          <ul>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Libro, 11 capítulos</li>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Cuaderno de ruta de 21 días</li>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>3 audios de bolsillo</li>
+            <li><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>Mapa de posición y 8 tarjetas</li>
+          </ul>
+          <div class="co-tot"><span>Pago único</span><b>19 €</b></div>
+        </aside>
+        <form class="co-form" id="co-f" novalidate>
+          <h2 id="co-t">Finalizar compra</h2>
+          <label class="co-f"><span>Email para recibir el acceso</span><input type="email" id="co-em" name="email" autocomplete="email" inputmode="email" placeholder="tu@email.com" required aria-describedby="co-e1"><small class="co-err" id="co-e1" role="alert"></small></label>
+          <label class="co-f"><span>Nombre (opcional)</span><input type="text" id="co-nm" name="name" autocomplete="name" placeholder="Tu nombre"></label>
+          <fieldset>
+            <legend>Método de pago</legend>
+            <div class="co-m" id="co-m">
+              <label><input type="radio" name="pm" value="card" checked><span>Tarjeta<small>Visa · Mastercard · Amex</small></span></label>
+              <label><input type="radio" name="pm" value="paypal"><span>PayPal</span></label>
+              <label><input type="radio" name="pm" value="bizum"><span>Bizum</span></label>
+              <label><input type="radio" name="pm" value="apple"><span>Apple Pay</span></label>
+              <label><input type="radio" name="pm" value="google"><span>Google Pay</span></label>
+            </div>
+          </fieldset>
+          <div class="co-note" id="co-note" aria-live="polite"></div>
+          <label class="co-chk"><input type="checkbox" id="co-ck" required><span>Acepto los términos de compra y la política de privacidad.</span></label>
+          <small class="co-err" id="co-e2" role="alert"></small>
+          <button type="submit" class="sh-buy co-pay" id="co-pay"><span id="co-pt">Pagar 19 €</span></button>
+          <div class="co-sec"><span>Pago seguro</span><span>7 días de garantía</span><span>Descarga inmediata</span></div>
+        </form>
+      </div>
+    </div>
+    <div id="co-ok" class="co-ok" hidden>
+      <div class="tick"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M8 19l7 7 13-15"/></svg></div>
+      <h2 id="co-okt" tabindex="-1">Ya es tuyo</h2>
+      <p id="co-okp">Te hemos enviado el acceso por email.</p>
+      <ul>
+        <li><span>Salir del modo supervivencia</span><em>Libro · PDF</em></li>
+        <li><span>Cuaderno de ruta de 21 días</span><em>PDF</em></li>
+        <li><span>3 audios de bolsillo</span><em>MP3</em></li>
+        <li><span>Mapa de posición y tarjetas</span><em>PDF</em></li>
+      </ul>
+      <button type="button" class="sh-buy" data-close>Cerrar</button>
+      <p class="co-demo2">Así será el final de la compra. En la versión real, el pago y el envío del email los gestiona la plataforma de pago.</p>
+    </div>
+  </div>
+</div>
+<div class="sh-toast" id="sh-toast" role="status" aria-live="polite">Aquí se abrirá el pago seguro de Hotmart (enlace pendiente de configurar).</div>
+
+<section class="cierre" id="comprar">
+  <div class="in">
+    <h2>Deja de analizar de dónde vienes y decide <em>hacia dónde vas</em></h2>
+    <a class="btn" href="#tienda">Empezar mi recorrido hoy</a>
+  </div>
+  <div class="band" aria-hidden="true"><div class="track" id="t1"></div></div>
+  <div class="band rev" aria-hidden="true"><div class="track" id="t2"></div></div>
+</section>
+</main>
+
+<footer>
+  <p>© 2026 KarolyTST · Carolina Muñoz Conde · Todos los derechos reservados.</p>
+  <p>Las constelaciones familiares, la PNL y las herramientas de regulación de este material son enfoques de autoconocimiento y desarrollo personal no clínicos. No constituyen ni sustituyen tratamientos médicos ni psicológicos.</p>
+  <p>Prototipo de diseño para revisión. Textos entre corchetes y reseñas de ejemplo pendientes de Karol.</p>
+</footer>
+
+<div class="rot" role="alert"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="40" rx="3"/><path d="M22 38h4"/></svg><p>Gira el teléfono en vertical para leer el libro</p></div>
+
+<!-- Las 13 páginas del libro, en orden. El script las coloca como doble página o como página única según la pantalla. -->
+<div id="pages">
+
+<section class="pg cover" data-t="Portada" data-x="cover" aria-label="Portada">
+  <svg class="ort" viewBox="0 0 520 620" aria-hidden="true" focusable="false"><path d="M260 610 C262 480 258 360 262 120"/><path d="M262 470 C190 450 150 390 150 330 C220 340 262 400 262 470Z"/><path d="M262 380 C340 360 380 300 378 240 C306 250 262 310 262 380Z"/><path d="M261 280 C196 262 168 210 170 160 C230 170 261 220 261 280Z"/><path d="M262 200 C318 186 348 140 346 96 C294 104 262 146 262 200Z"/><path d="M262 120 L262 40"/><circle cx="262" cy="30" r="12"/></svg>
+  <div class="ctitle">
+    <small>Método KarolyTST</small>
+    <h1>Salir del modo <em>supervivencia</em></h1>
+    <p>Ordena tu historia familiar y devuelve a tu cuerpo la calma.</p>
+    <div class="hint" id="hint"><i></i><span>Desliza para pasar la página</span></div>
+  </div>
+</section>
+
+<section class="pg" data-t="Prólogo" aria-label="Prólogo">
+  <span class="note">Antes de empezar</span>
+  <p class="q" style="margin-top:2.4em">Dejar de analizar de dónde vienes y decidir hacia dónde vas empieza por ocupar <em>tu propio lugar</em>.</p>
+  <p class="txt" style="margin-top:2em">Una guía práctica para soltar cargas heredadas, desactivar la alerta constante y mirar tu historia con respeto, sin cortar con nadie.</p>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 270" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M150 130L150 86" stroke-width="2.4"/><path d="M150 86L163 55M150 86L134 57" stroke-width="1.7"/><path d="M163 55L181 36M163 55L157 31M134 57L130 30M134 57L111 45" stroke-width="1.2"/><path d="M181 36L201 31M181 36L191 17M157 31L163 13M157 31L146 17M130 30L136 9M130 30L119 12M111 45L97 31M111 45L92 44" stroke-width="0.8"/><path d="M201 31L216 31M201 31L214 23M191 17L204 7M191 17L190 1M163 13L173 4M163 13L161 -1M146 17L142 3M146 17L136 9M136 9L143 -5M136 9L133 -7M119 12L114 -3M119 12L107 2M97 31L90 18M97 31L84 24M92 44L79 40M92 44L78 48" stroke-width="0.6"/><path d="M216 31L227 36M216 31L226 25M214 23L226 22M214 23L221 13M204 7L216 5M204 7L209 -3M190 1L192 -10M190 1L181 -9M173 4L183 -0M173 4L179 -5M161 -1L165 -11M161 -1L155 -10M142 3L143 -7M142 3L135 -4M136 9L131 -0M136 9L126 7M143 -5L154 -10M143 -5L143 -16M133 -7L138 -18M133 -7L126 -17M114 -3L114 -16M114 -3L105 -11M107 2L101 -9M107 2L95 -1M90 18L87 7M90 18L81 11M84 24L79 14M84 24L74 25M79 40L72 32M79 40L69 42M78 48L67 47M78 48L70 56" stroke-width="0.6"/><path d="M227 36L233 41M227 36L236 34M226 25L235 23M226 25L230 17M226 22L235 24M226 22L234 19M221 13L229 9M221 13L223 4M216 5L225 6M216 5L222 -1M209 -3L217 -8M209 -3L210 -12M192 -10L198 -16M192 -10L190 -19M181 -9L180 -19M181 -9L172 -12M183 -0L191 -1M183 -0L187 -6M179 -5L185 -10M179 -5L179 -14M165 -11L171 -17M165 -11L165 -19M155 -10L154 -19M155 -10L148 -14M143 -7L147 -14M143 -7L141 -15M135 -4L133 -12M135 -4L127 -5M131 -0L130 -8M131 -0L126 -6M126 7L119 2M126 7L118 8M154 -10L163 -11M154 -10L159 -17M143 -16L147 -24M143 -16L139 -24M138 -18L145 -24M138 -18L138 -27M126 -17L125 -27M126 -17L116 -21M114 -16L117 -25M114 -16L110 -23M105 -11L101 -19M105 -11L97 -15M101 -9L101 -19M101 -9L94 -15M95 -1L87 -6M95 -1L86 -1M87 7L90 -1M87 7L82 -0M81 11L77 3M81 11L72 9M79 14L78 5M79 14L73 9M74 25L66 22M74 25L68 30M72 32L68 25M72 32L64 30M69 42L63 40M69 42L63 46M67 47L61 41M67 47L59 49M70 56L62 56M70 56L66 63" stroke-width="0.6"/><path d="M233 41h.1M236 34h.1M235 23h.1M230 17h.1M235 24h.1M234 19h.1M229 9h.1M223 4h.1M225 6h.1M222 -1h.1M217 -8h.1M210 -12h.1M198 -16h.1M190 -19h.1M180 -19h.1M172 -12h.1M191 -1h.1M187 -6h.1M185 -10h.1M179 -14h.1M171 -17h.1M165 -19h.1M154 -19h.1M148 -14h.1M147 -14h.1M141 -15h.1M133 -12h.1M127 -5h.1M130 -8h.1M126 -6h.1M119 2h.1M118 8h.1M163 -11h.1M159 -17h.1M147 -24h.1M139 -24h.1M145 -24h.1M138 -27h.1M125 -27h.1M116 -21h.1M117 -25h.1M110 -23h.1M101 -19h.1M97 -15h.1M101 -19h.1M94 -15h.1M87 -6h.1M86 -1h.1M90 -1h.1M82 -0h.1M77 3h.1M72 9h.1M78 5h.1M73 9h.1M66 22h.1M68 30h.1M68 25h.1M64 30h.1M63 40h.1M63 46h.1M61 41h.1M59 49h.1M62 56h.1M66 63h.1" stroke-width="3.2" stroke-linecap="round" opacity=".7"/><path d="M20 130H280" stroke-width=".8" opacity=".6"/><path d="M150 130L150 174" stroke-width="1.8" opacity=".5"/><path d="M150 174L163 205M150 174L134 203" stroke-width="1.3" opacity=".5"/><path d="M163 205L181 224M163 205L157 229M134 203L130 230M134 203L111 215" stroke-width="0.9" opacity=".5"/><path d="M181 224L201 229M181 224L191 243M157 229L163 247M157 229L146 243M130 230L136 251M130 230L119 248M111 215L97 229M111 215L92 216" stroke-width="0.6" opacity=".5"/><path d="M201 229L216 229M201 229L214 237M191 243L204 253M191 243L190 259M163 247L173 256M163 247L161 261M146 243L142 257M146 243L136 251M136 251L143 265M136 251L133 267M119 248L114 263M119 248L107 258M97 229L90 242M97 229L84 236M92 216L79 220M92 216L78 212" stroke-width="0.5" opacity=".5"/><path d="M216 229L227 224M216 229L226 235M214 237L226 238M214 237L221 247M204 253L216 255M204 253L209 263M190 259L192 270M190 259L181 269M173 256L183 260M173 256L179 265M161 261L165 271M161 261L155 270M142 257L143 267M142 257L135 264M136 251L131 260M136 251L126 253M143 265L154 270M143 265L143 276M133 267L138 278M133 267L126 277M114 263L114 276M114 263L105 271M107 258L101 269M107 258L95 261M90 242L87 253M90 242L81 249M84 236L79 246M84 236L74 235M79 220L72 228M79 220L69 218M78 212L67 213M78 212L70 204" stroke-width="0.5" opacity=".5"/><path d="M227 224L233 219M227 224L236 226M226 235L235 237M226 235L230 243M226 238L235 236M226 238L234 241M221 247L229 251M221 247L223 256M216 255L225 254M216 255L222 261M209 263L217 268M209 263L210 272M192 270L198 276M192 270L190 279M181 269L180 279M181 269L172 272M183 260L191 261M183 260L187 266M179 265L185 270M179 265L179 274M165 271L171 277M165 271L165 279M155 270L154 279M155 270L148 274M143 267L147 274M143 267L141 275M135 264L133 272M135 264L127 265M131 260L130 268M131 260L126 266M126 253L119 258M126 253L118 252M154 270L163 271M154 270L159 277M143 276L147 284M143 276L139 284M138 278L145 284M138 278L138 287M126 277L125 287M126 277L116 281M114 276L117 285M114 276L110 283M105 271L101 279M105 271L97 275M101 269L101 279M101 269L94 275M95 261L87 266M95 261L86 261M87 253L90 261M87 253L82 260M81 249L77 257M81 249L72 251M79 246L78 255M79 246L73 251M74 235L66 238M74 235L68 230M72 228L68 235M72 228L64 230M69 218L63 220M69 218L63 214M67 213L61 219M67 213L59 211M70 204L62 204M70 204L66 197" stroke-width="0.5" opacity=".5"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="El espejo" aria-label="El espejo">
+  <span class="note">El espejo</span>
+  <h2 class="tt">¿Dónde notas <em>el peso</em> hoy?</h2>
+  <ul class="items">
+    <li><b>La exigencia que no se apaga</b><span>No sabes descansar sin inquietud o culpa. Si sueltas el control diez minutos, sientes que todo se derrumba.</span></li>
+    <li><b>Hacer de madre de tus propios padres</b><span>Eres el sostén emocional de tu familia y te quedas sin energía para tu propia vida.</span></li>
+    <li><b>El techo económico</b><span>Cuando estás a punto de dar un salto, algo te frena, como si prosperar fuera una falta de lealtad.</span></li>
+  </ul>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><ellipse cx="150" cy="100" rx="62" ry="86"/><ellipse cx="150" cy="100" rx="52" ry="76" stroke-width=".7" opacity=".6"/><path d="M118 62l26-22M112 82l50-42" stroke-width=".9" opacity=".6"/><path d="M150 186v24M132 214h36" /><path d="M214 40c20-6 34 4 40 22-20 6-34-4-40-22Z" opacity=".7"/><path d="M214 40c14 6 26 14 34 22" opacity=".7"/><path d="M62 160c-20-4-30-16-30-32 20 0 30 12 30 32Z" opacity=".7"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Sigue mirando" aria-label="El espejo, continuación">
+  <span class="note">Sigue mirando</span>
+  <ul class="items" style="margin-top:2.2em">
+    <li><b>Dar de más hasta vaciarte</b><span>Detectas lo que necesitan los demás antes de que hablen. Decir «no» o pedir ayuda te cuesta horrores.</span></li>
+    <li><b>El miedo a repetir el bucle con tus hijos</b><span>Reaccionas con las mismas prisas y miedos que viviste en casa, y no quieres pasárselos.</span></li>
+    <li><b>Una espera que desgasta</b><span>Sigues esperando que tu madre o tu padre cambien o te den hoy lo que no pudieron darte entonces.</span></li>
+  </ul>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width=".9" stroke-linecap="round"><path d="M79 176L126 166M79 176L53 134M53 134L79 176M53 134L118 126M42 59L53 134M42 59L119 37M280 52L254 113M280 52L150 100M126 166L118 126M126 166L79 176M119 37L150 100M119 37L42 59M118 126L126 166M118 126L150 100M254 113L280 52M254 113L203 174M171 138L150 100M171 138L203 174M203 174L171 138M203 174L126 166" opacity=".55"/><circle cx="79" cy="176" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="53" cy="134" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="42" cy="59" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="280" cy="52" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="126" cy="166" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="119" cy="37" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="118" cy="126" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="254" cy="113" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="171" cy="138" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="203" cy="174" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="150" cy="100" r="22" stroke-width="1.2"/><circle cx="150" cy="100" r="8" fill="currentColor" stroke="none"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Una idea" aria-label="Una idea">
+  <span class="note">Una idea</span>
+  <p class="q" style="margin-top:2.2em">No puedes cambiar lo que vivieron los que vinieron antes. Sí puedes decidir qué lugar ocupas tú <em>hoy</em> frente a esa historia.</p>
+  <p class="txt" style="margin-top:2em">Entender tu historia con la mente no basta si tu cuerpo sigue creyendo que tiene que salvar a todo el mundo para estar a salvo.</p>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="95" y="18" width="110" height="170" rx="10"/><circle cx="150" cy="158" r="13" fill="currentColor" stroke="none" opacity=".8"/><path d="M150 145V70M150 118c-18-2-28-14-28-28 17 2 28 12 28 28ZM150 92c15-2 24-12 24-24-15 2-24 10-24 24Z"/><path d="M60 188H240" opacity=".6"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="El método" aria-label="El método">
+  <span class="note">El método</span>
+  <h2 class="tt">Poner orden y bajar la guardia</h2>
+  <div class="pil">
+    <div><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M22 40V16M22 26c-8-1-12-6-12-12 7 1 12 5 12 12ZM22 20c6-1 10-5 10-10-6 1-10 4-10 10Z"/></svg><p><b>Mirada sistémica</b><span>Ver dónde estás descolocada, honrar tu origen y hacer La Devolución sin culpa.</span></p></div>
+    <div><svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="16"/><path d="M14 22c3-5 5-5 8 0s5 5 8 0"/></svg><p><b>Regulación corporal</b><span>Enseñarle a tu sistema nervioso a salir del modo supervivencia.</span></p></div>
+    <div><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M8 34 22 10l14 24Z"/><path d="M22 10v24M15 22h14"/></svg><p><b>PNL</b><span>Cambiar tu diálogo interno y trazar una ruta clara hacia donde quieres ir.</span></p></div>
+  </div>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width=".9" stroke-linecap="round"><path d="M81 35L123 43M81 35L37 84M123 43L81 35M123 43L150 100M37 84L81 35M37 84L101 121M259 149L210 158M259 149L219 54M219 54L150 100M219 54L123 43M76 170L101 121M76 170L37 84M101 121L150 100M101 121L76 170M210 158L259 149M210 158L150 100" opacity=".55"/><circle cx="81" cy="35" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="123" cy="43" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="37" cy="84" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="259" cy="149" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="219" cy="54" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="76" cy="170" r="4" fill="currentColor" stroke="none" opacity=".8"/><circle cx="101" cy="121" r="5" fill="currentColor" stroke="none" opacity=".8"/><circle cx="210" cy="158" r="3" fill="currentColor" stroke="none" opacity=".8"/><circle cx="150" cy="100" r="22" stroke-width="1.2"/><circle cx="150" cy="100" r="8" fill="currentColor" stroke="none"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Lo que cambia" aria-label="Lo que cambia">
+  <span class="note">Cuando ocupas tu lugar</span>
+  <h2 class="tt">Lo que empieza a cambiar</h2>
+  <ul class="items">
+    <li><b>Sueltas el papel de salvadora</b><span>Recuperas la ligereza de ser simplemente la hija.</span></li>
+    <li><b>Sales de la trampa de las expectativas</b><span>Dejas de esperar disculpas que no dependen de ti.</span></li>
+    <li><b>Sostienes tus límites</b><span>Atraviesas los diez minutos de culpa cuando te priorizas.</span></li>
+    <li><b>Te relacionas de igual a igual</b><span>Aprendes a recibir sin deber nada a cambio.</span></li>
+  </ul>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M30 180H80V140H130V100H180V60H230V24"/><path d="M30 180H270" opacity=".5"/><circle cx="230" cy="12" r="8" fill="currentColor" stroke="none"/><path d="M60 130c8-14 14-20 22-26M112 90c8-14 14-20 22-26M162 50c6-8 10-12 16-16" stroke-dasharray="2 6" opacity=".7"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Qué incluye" aria-label="Qué incluye">
+  <span class="note">Qué incluye</span>
+  <h2 class="tt">El libro y tres llaves</h2>
+  <ul class="kit">
+    <li><b>Salir del modo supervivencia</b><s>47 €</s><span>11 capítulos en 4 bloques. PDF.</span></li>
+    <li><b>Cuaderno de ruta, 21 días</b><s>19 €</s><span>Un ejercicio de 5 minutos al día. PDF.</span></li>
+    <li><b>3 audios de bolsillo</b><s>15 €</s><span>De 5 a 7 minutos cada uno. MP3.</span></li>
+    <li><b>Tu mapa de posición</b><s>12 €</s><span>Semáforo del cuerpo y 8 tarjetas de orden. PDF.</span></li>
+  </ul>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="70" y="128" width="170" height="30" rx="2"/><rect x="84" y="94" width="150" height="30" rx="2"/><rect x="62" y="60" width="160" height="30" rx="2"/><path d="M84 143h40M98 109h36M76 75h44" opacity=".6"/><path d="M150 56V30M150 40c-12-2-18-10-18-20 12 2 18 8 18 20ZM150 34c10-2 16-8 16-16-10 2-16 6-16 16Z"/><path d="M40 162H260" opacity=".5"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Los 21 días" aria-label="Los 21 días">
+  <span class="note">El cuaderno de ruta</span>
+  <h2 class="tt">21 paradas, 5 minutos al día</h2>
+  <div class="dias">
+    <div><small>DÍAS 1 A 7</small><b>Detectar la alarma</b><span>Pillas cuándo funcionas en modo supervivencia.</span></div>
+    <div><small>DÍAS 8 A 14</small><b>Ordenar tu lugar</b><span>Revisas dónde estás colocada y practicas La Devolución.</span></div>
+    <div><small>DÍAS 15 A 21</small><b>Trazar tu nueva ruta</b><span>Diriges tu energía a tus propios proyectos con PNL.</span></div>
+  </div>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 5" stroke-linecap="round"><path d="M20 123 L33 140 L46 152 L59 158 L72 156 L85 148 L98 135 L111 118 L124 99 L137 80 L150 65 L163 53 L176 48 L189 49 L202 55 L215 67 L228 83 L241 100 L254 116 L267 131 L280 141" opacity=".5"/><g stroke-dasharray="none"><circle cx="20" cy="123" r="6" fill="currentColor" stroke="none" opacity="1"/><circle cx="33" cy="140" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="46" cy="152" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="59" cy="158" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="72" cy="156" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="85" cy="148" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="98" cy="135" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="111" cy="118" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="124" cy="99" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="137" cy="80" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="150" cy="65" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="163" cy="53" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="176" cy="48" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="189" cy="49" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="202" cy="55" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="215" cy="67" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="228" cy="83" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="241" cy="100" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="254" cy="116" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="267" cy="131" r="3" fill="currentColor" stroke="none" opacity="0.75"/><circle cx="280" cy="141" r="6" fill="currentColor" stroke="none" opacity="1"/></g></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Reseñas" aria-label="Reseñas">
+  <span class="note">Lo que cuentan</span>
+  <h2 class="tt">Historias de quienes ya ocupan <em>su lugar</em></h2>
+  <p class="txt">Aquí aparecerán las palabras de las personas que han hecho el recorrido. Pasa las reseñas en la página siguiente.</p>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><text x="150" y="168" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-size="230" font-style="italic" fill="currentColor" stroke="none" opacity=".85">“</text><path d="M40 184H260" opacity=".5"/><path d="M60 40l4 10 10 4-10 4-4 10-4-10-10-4 10-4ZM244 80l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z" fill="currentColor" stroke="none" opacity=".7"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Reseñas de lectoras" aria-label="Reseñas de lectoras">
+  <span class="note">Reseñas</span>
+  <div class="rvs" id="rvs" role="region" aria-roledescription="carrusel" aria-label="Reseñas de lectoras" tabindex="0">
+    <div class="rvs-view"><div class="rvs-track" id="rvs-track"><figure class="rv-s" role="group" aria-roledescription="diapositiva" aria-label="1 de 5"><div class="rv-st" role="img" aria-label="5 de 5 estrellas"><svg viewBox="0 0 100 18" aria-hidden="true"><path d="M9 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L9 13.4 4 16.2l1.2-5.6L1 6.8l5.6-.6Z M27 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L27 13.4l-5 2.8 1.2-5.6L19 6.8l5.6-.6Z M45 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L45 13.4l-5 2.8 1.2-5.6L37 6.8l5.6-.6Z M63 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L63 13.4l-5 2.8 1.2-5.6L55 6.8l5.6-.6Z M81 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L81 13.4l-5 2.8 1.2-5.6L73 6.8l5.6-.6Z"/></svg></div><blockquote>Por primera vez en años descansé un domingo sin sentir que estaba fallando a alguien.</blockquote><figcaption><i aria-hidden="true">A.</i><span>[Nombre], [ciudad]<small>Reseña de ejemplo</small></span></figcaption></figure><figure class="rv-s" role="group" aria-roledescription="diapositiva" aria-label="2 de 5"><div class="rv-st" role="img" aria-label="5 de 5 estrellas"><svg viewBox="0 0 100 18" aria-hidden="true"><path d="M9 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L9 13.4 4 16.2l1.2-5.6L1 6.8l5.6-.6Z M27 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L27 13.4l-5 2.8 1.2-5.6L19 6.8l5.6-.6Z M45 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L45 13.4l-5 2.8 1.2-5.6L37 6.8l5.6-.6Z M63 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L63 13.4l-5 2.8 1.2-5.6L55 6.8l5.6-.6Z M81 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L81 13.4l-5 2.8 1.2-5.6L73 6.8l5.6-.6Z"/></svg></div><blockquote>Los audios de cinco minutos me sostuvieron los días en que no tenía ganas de nada.</blockquote><figcaption><i aria-hidden="true">M.</i><span>[Nombre], [ciudad]<small>Reseña de ejemplo</small></span></figcaption></figure><figure class="rv-s" role="group" aria-roledescription="diapositiva" aria-label="3 de 5"><div class="rv-st" role="img" aria-label="5 de 5 estrellas"><svg viewBox="0 0 100 18" aria-hidden="true"><path d="M9 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L9 13.4 4 16.2l1.2-5.6L1 6.8l5.6-.6Z M27 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L27 13.4l-5 2.8 1.2-5.6L19 6.8l5.6-.6Z M45 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L45 13.4l-5 2.8 1.2-5.6L37 6.8l5.6-.6Z M63 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L63 13.4l-5 2.8 1.2-5.6L55 6.8l5.6-.6Z M81 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L81 13.4l-5 2.8 1.2-5.6L73 6.8l5.6-.6Z"/></svg></div><blockquote>Entendí que no tenía que cargar con todo. Dejé de esperar disculpas y empecé a mirar lo mío.</blockquote><figcaption><i aria-hidden="true">L.</i><span>[Nombre], [ciudad]<small>Reseña de ejemplo</small></span></figcaption></figure><figure class="rv-s" role="group" aria-roledescription="diapositiva" aria-label="4 de 5"><div class="rv-st" role="img" aria-label="5 de 5 estrellas"><svg viewBox="0 0 100 18" aria-hidden="true"><path d="M9 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L9 13.4 4 16.2l1.2-5.6L1 6.8l5.6-.6Z M27 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L27 13.4l-5 2.8 1.2-5.6L19 6.8l5.6-.6Z M45 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L45 13.4l-5 2.8 1.2-5.6L37 6.8l5.6-.6Z M63 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L63 13.4l-5 2.8 1.2-5.6L55 6.8l5.6-.6Z M81 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L81 13.4l-5 2.8 1.2-5.6L73 6.8l5.6-.6Z"/></svg></div><blockquote>El cuaderno de ruta es sencillo y claro. Cada día una pregunta, y poco a poco algo se ordena.</blockquote><figcaption><i aria-hidden="true">C.</i><span>[Nombre], [ciudad]<small>Reseña de ejemplo</small></span></figcaption></figure><figure class="rv-s" role="group" aria-roledescription="diapositiva" aria-label="5 de 5"><div class="rv-st" role="img" aria-label="5 de 5 estrellas"><svg viewBox="0 0 100 18" aria-hidden="true"><path d="M9 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L9 13.4 4 16.2l1.2-5.6L1 6.8l5.6-.6Z M27 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L27 13.4l-5 2.8 1.2-5.6L19 6.8l5.6-.6Z M45 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L45 13.4l-5 2.8 1.2-5.6L37 6.8l5.6-.6Z M63 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L63 13.4l-5 2.8 1.2-5.6L55 6.8l5.6-.6Z M81 1l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L81 13.4l-5 2.8 1.2-5.6L73 6.8l5.6-.6Z"/></svg></div><blockquote>Lo leí con calma y sin culpa. Me ayudó a poner límites con mi madre sin pelear con ella.</blockquote><figcaption><i aria-hidden="true">P.</i><span>[Nombre], [ciudad]<small>Reseña de ejemplo</small></span></figcaption></figure></div></div>
+    <div class="rvs-ctl">
+      <button type="button" class="rv-a" id="rv-prev" aria-label="Reseña anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="rv-dots"><button type="button" class="rv-d" aria-label="Ir a la reseña 1"></button><button type="button" class="rv-d" aria-label="Ir a la reseña 2"></button><button type="button" class="rv-d" aria-label="Ir a la reseña 3"></button><button type="button" class="rv-d" aria-label="Ir a la reseña 4"></button><button type="button" class="rv-d" aria-label="Ir a la reseña 5"></button></div>
+      <button type="button" class="rv-a" id="rv-next" aria-label="Reseña siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+  <p class="rv-note">Reseñas de ejemplo para el diseño. Se sustituirán por las de lectoras reales.</p>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Oferta" id="p-oferta" aria-label="Oferta">
+  <span class="note">Acceso inmediato</span>
+  <h2 class="tt">Empieza hoy tu propio lugar</h2>
+  <ul class="oferta">
+    <li><span>Libro (11 capítulos)</span><s>47 €</s></li>
+    <li><span>Cuaderno de 21 días</span><s>19 €</s></li>
+    <li><span>3 audios de bolsillo</span><s>15 €</s></li>
+    <li><span>Mapa de posición</span><s>12 €</s></li>
+  </ul>
+  <div class="total"><small>Valor total 93 €<br>Pago único</small><b>19 €</b></div>
+  <a class="btn" href="#tienda">Sí, quiero mi guía y el kit</a>
+  <p class="trust">Pago seguro · Descarga inmediata · Móvil, tablet y ordenador</p>
+  <span class="folio"></span>
+</section>
+
+<section class="pg dark" data-t="Garantía" data-x="dark" aria-label="Garantía">
+  <div class="seal" role="img" aria-label="Sello: 7 días de garantía total">
+    <svg viewBox="0 0 320 320" aria-hidden="true" focusable="false">
+      <defs><path id="circ" d="M160,160 m-117,0 a117,117 0 1,1 234,0 a117,117 0 1,1 -234,0"/></defs>
+      <circle cx="160" cy="160" r="156" fill="none" stroke="#C5A059" stroke-width="1.5"/>
+      <circle cx="160" cy="160" r="148" fill="none" stroke="#C5A059" stroke-width=".7" stroke-dasharray="2 6"/>
+      <g class="ring"><text font-family="Jost, sans-serif" font-size="14" letter-spacing="3" fill="#C5A059" font-weight="500"><textPath href="#circ" textLength="726" lengthAdjust="spacing">GARANTÍA TOTAL • SIN PREGUNTAS • REEMBOLSO 100% • </textPath></text></g>
+      <circle cx="160" cy="160" r="96" fill="none" stroke="#C5A059" stroke-width="1"/>
+      <text class="n7" x="160" y="184" text-anchor="middle">7</text>
+      <text class="dd" x="163.5" y="216" text-anchor="middle">DÍAS</text>
+    </svg>
+  </div>
+  <p class="gt">Pruébalo sin riesgo. Si no es para ti, <em>te lo devolvemos</em>.</p>
+  <p class="txt">Descarga el libro, escucha los audios y haz el primer ejercicio. Pides el reembolso con un clic y recibes el 100%.</p>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Quién te acompaña" aria-label="Quién te acompaña">
+  <span class="note">Quién te acompaña</span>
+  <h2 class="tt">Hola, soy Carolina Muñoz (Karol)</h2>
+  <div class="foto"><span>[Foto profesional de Karol]<br>Medio cuerpo, fondo cálido y neutro</span></div>
+  <p class="txt">[TEXTO PROPIO DE KAROL: su historia y por qué creó este método, con sus palabras.]</p>
+  <p class="txt" style="margin-top:.7em">Facilitadora de Constelaciones Familiares, con formación en herramientas para el trauma y PNL. Creadora del Método KarolyTST.</p>
+  <div class="sign">Karol</div>
+  <span class="folio"></span>
+</section>
+
+<section class="pg" data-t="Preguntas" aria-label="Preguntas frecuentes">
+  <span class="note">Preguntas frecuentes</span>
+  <h2 class="tt">Antes de empezar</h2>
+  <div id="faqlist">
+    <div class="qa"><button type="button" aria-expanded="false" aria-controls="a1" id="q1">¿Necesito haber constelado antes?<i></i></button><div class="ans" id="a1" role="region" aria-labelledby="q1"><div><p>No. Todo está escrito en lenguaje claro y cotidiano, con ejemplos de la vida diaria.</p></div></div></div>
+    <div class="qa"><button type="button" aria-expanded="false" aria-controls="a2" id="q2">¿Cómo y cuándo recibo el material?<i></i></button><div class="ans" id="a2" role="region" aria-labelledby="q2"><div><p>En cuanto se confirma el pago recibes un email con el acceso para descargar todo. Es tuyo para siempre.</p></div></div></div>
+    <div class="qa"><button type="button" aria-expanded="false" aria-controls="a3" id="q3">¿Cuánto tiempo necesito al día?<i></i></button><div class="ans" id="a3" role="region" aria-labelledby="q3"><div><p>Los ejercicios del cuaderno y los audios están pensados para 5 minutos al día.</p></div></div></div>
+    <div class="qa"><button type="button" aria-expanded="false" aria-controls="a4" id="q4">¿Sustituye a un proceso psicológico o médico?<i></i></button><div class="ans" id="a4" role="region" aria-labelledby="q4"><div><p>No. Es una herramienta de autoconocimiento y desarrollo personal. No reemplaza la atención psicológica, psiquiátrica o médica profesional.</p></div></div></div>
+  </div>
+  <div class="art" aria-hidden="true"><svg viewBox="0 0 300 200" preserveAspectRatio="xMidYMid meet" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><circle cx="150" cy="100" r="70"/><circle cx="150" cy="100" r="88" stroke-dasharray="2 7" opacity=".7"/><text x="150" y="132" text-anchor="middle" font-family="Cormorant Garamond,Georgia,serif" font-size="96" fill="currentColor" stroke="none" opacity=".85">?</text><circle cx="62" cy="52" r="4" fill="currentColor" stroke="none"/><circle cx="244" cy="150" r="5" fill="currentColor" stroke="none"/><circle cx="236" cy="42" r="3" fill="currentColor" stroke="none"/></svg></div>
+  <span class="folio"></span>
+</section>
+
+</div>
+
+<script>
+(function(){
+  var A0 = 0.02, FLIP = 0.7, NPG = 15;
+  var body = document.body, pin = document.getElementById('pin'), stage = document.getElementById('stage');
+  var book = document.getElementById('book'), pagesEl = document.getElementById('pages'), nav = document.getElementById('nav');
+  var bar = document.getElementById('bar'), hint = document.getElementById('hint');
+  var pgs = Array.prototype.slice.call(pagesEl.children);
+  var TITLES = pgs.map(function(p){ return p.getAttribute('data-t'); });
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var STOPS = [['Portada',0],['Prólogo',1],['Espejo',2],['Método',3],['Kit y ruta',4],['Reseñas',5],['Oferta',6],['Karol y dudas',7]];
+  var OFERTA_PAGE = 11;
+
+  var mode = '', F = 7, SLOT = 0.16, leaves = [], flipsNow = -1, W0 = 0, H0 = 0, perFlip = 0;
+  var navPrev, navNext, navLbl, navPills = [];
+
+  function clamp(x,a,b){ return Math.max(a, Math.min(b,x)); }
+  function ease(t){ t = clamp(t,0,1); return t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+  function mk(tag, cls){ var e = document.createElement(tag); if(cls) e.className = cls; return e; }
+
+  /* Cintas infinitas */
+  function fill(id, words){
+    var t = document.getElementById(id), h = '';
+    for(var i=0;i<2;i++) words.forEach(function(w){ h += '<span>'+w+'<b>✦</b></span>'; });
+    t.innerHTML = h;
+  }
+  fill('t1',['Pertenecer','Honrar','Devolver con respeto','Ocupar tu lugar','Bajar la guardia','Elegir tu camino']);
+  fill('t2',['Tu cuerpo ya puede descansar','Lo que no es tuyo se devuelve','Cinco minutos al día','Veintiún días para salir del bucle']);
+
+  /* ---- Construcción del libro según la pantalla ---- */
+  function build(m){
+    pgs.forEach(function(p){ pagesEl.appendChild(p); });
+    book.innerHTML = ''; leaves = [];
+    F = m === 'spread' ? (NPG-1)/2 : NPG-1;
+    SLOT = (1 - A0 - 0.04) / F;
+    for(var k=0;k<F;k++){
+      var leaf = mk('div','leaf'), front, back;
+      if(m === 'spread'){ front = pgs[2*k]; back = pgs[2*k+1]; }
+      else { front = pgs[k]; back = mk('div','blank face back'); back.appendChild(mk('span','folio')); back.setAttribute('aria-hidden','true'); }
+      setCls(front, k===0 || m==='single' ? 'r front' : 'r front');
+      if(m === 'spread') setCls(back, 'l back');
+      leaf.appendChild(front); leaf.appendChild(back);
+      book.appendChild(leaf); leaves.push(leaf);
+    }
+    var base = mk('div','base'); setCls(pgs[NPG-1], 'r'); base.appendChild(pgs[NPG-1]); book.appendChild(base);
+    pgs.forEach(function(p,i){
+      var f = p.querySelector('.folio'); if(f) f.textContent = i === 0 ? '' : String(i+1);
+    });
+  }
+  function setCls(p, side){
+    var x = p.getAttribute('data-x') || '';
+    p.className = 'pg face ' + side + (x ? ' ' + x : '');
+  }
+
+  /* Tamaños: página, tipografía, altura del recorrido */
+  function sizes(m, W, H){
+    var hh = W < 600 ? 56 : 64, nh = 76, availH = H - hh - nh, pw, ph, fs;
+    if(m === 'spread'){
+      pw = Math.min(640, 0.94*W/2, availH/1.333); ph = pw*1.333; fs = pw/31;
+    } else {
+      pw = Math.min(0.92*W, 640, availH/1.3);
+      ph = Math.min(availH, pw*(W < 600 ? 1.9 : 1.6));
+      fs = Math.min(pw/22.5, ph/44, 21);
+    }
+    var s = body.style;
+    s.setProperty('--hh', hh+'px'); s.setProperty('--nh', nh+'px');
+    s.setProperty('--pw', pw.toFixed(1)+'px'); s.setProperty('--ph', ph.toFixed(1)+'px');
+    s.setProperty('--bw', (m==='spread' ? pw*2 : pw).toFixed(1)+'px'); s.setProperty('--fs', fs.toFixed(2)+'px');
+    perFlip = (m === 'spread' ? 1.25 : 0.8) * H;
+    pin.style.height = 'calc(100vh + ' + Math.round(F*perFlip) + 'px)';
+    if(window.CSS && CSS.supports && CSS.supports('height','100svh')) pin.style.height = 'calc(100svh + ' + Math.round(F*perFlip) + 'px)';
+  }
+
+  /* Ajuste fino: si una página no cabe, se reduce su letra un poco */
+  function fit(){
+    pgs.forEach(function(p){
+      p.style.setProperty('--fit', 1);
+      var f = 1, g = 0;
+      while((p.scrollHeight > p.clientHeight + 1 || p.scrollWidth > p.clientWidth + 1) && f > 0.8 && g++ < 12){
+        f -= 0.02; p.style.setProperty('--fit', f.toFixed(2));
+      }
+    });
+  }
+
+  /* ---- Navegación inferior ---- */
+  var CH_L = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CH_R = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  function buildNav(){
+    nav.innerHTML = ''; navPills = [];
+    navPrev = mk('button','arr'); navPrev.type = 'button'; navPrev.innerHTML = CH_L; navPrev.setAttribute('aria-label','Página anterior');
+    navNext = mk('button','arr'); navNext.type = 'button'; navNext.innerHTML = CH_R; navNext.setAttribute('aria-label','Página siguiente');
+    navPrev.addEventListener('click', function(){ step(-1); });
+    navNext.addEventListener('click', function(){ step(1); });
+    nav.appendChild(navPrev);
+    if(mode === 'spread'){
+      var w = mk('div','pills');
+      STOPS.forEach(function(s){
+        var b = mk('button'); b.type = 'button'; b.textContent = s[0];
+        b.addEventListener('click', function(){ goToFlip(s[1]); });
+        w.appendChild(b); navPills.push(b);
+      });
+      nav.appendChild(w); navLbl = null;
+    } else {
+      navLbl = mk('div','lbl'); navLbl.setAttribute('aria-live','polite'); nav.appendChild(navLbl);
+    }
+    nav.appendChild(navNext);
+    flipsNow = -1;
+  }
+  function paintNav(fl){
+    navPrev.setAttribute('aria-disabled', fl <= 0 ? 'true' : 'false');
+    navNext.setAttribute('aria-disabled', fl >= F ? 'true' : 'false');
+    if(mode === 'spread'){ navPills.forEach(function(b,j){ b.classList.toggle('on', STOPS[j][1] === fl); }); }
+    else if(navLbl){ navLbl.innerHTML = TITLES[fl] + '<small>' + (fl+1) + ' / ' + NPG + '</small>'; }
+  }
+
+  /* ---- Movimiento ---- */
+  function totalScroll(){ return pin.offsetHeight - stage.offsetHeight; }
+  function pOf(f){ return f <= 0 ? 0 : A0 + (f-1)*SLOT + SLOT*0.88; }
+  function goToFlip(f){
+    f = clamp(f, 0, F);
+    window.scrollTo({top: pin.offsetTop + pOf(f)*totalScroll(), behavior: reduce.matches ? 'auto' : 'smooth'});
+  }
+  function step(d){ goToFlip((flipsNow < 0 ? 0 : flipsNow) + d); }
+  var cta = document.getElementById('hdr-cta');
+  cta.addEventListener('click', function(e){
+    e.preventDefault();
+    goToFlip(mode === 'spread' ? Math.ceil(OFERTA_PAGE/2) : OFERTA_PAGE);
+  });
+
+  function showPages(fl){
+    pgs.forEach(function(p,i){
+      var vis = mode === 'spread' ? (i === 2*fl || (fl > 0 && i === 2*fl-1)) : i === fl;
+      if(vis){ p.removeAttribute('inert'); p.removeAttribute('aria-hidden'); }
+      else { p.setAttribute('inert',''); p.setAttribute('aria-hidden','true'); }
+    });
+  }
+
+  function update(){
+    var y = window.pageYOffset || document.documentElement.scrollTop;
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.setProperty('--sp', max>0 ? (y/max).toFixed(4) : 0);
+    var total = totalScroll();
+    var p = total>0 ? clamp((y - pin.offsetTop)/total, 0, 1) : 0;
+    var fl = 0, e0 = 0, single = mode === 'single', still = reduce.matches;
+    for(var k=0;k<leaves.length;k++){
+      var t = (p - (A0 + k*SLOT)) / (SLOT*FLIP);
+      var e = still ? (t >= 0.35 ? 1 : 0) : ease(t);
+      if(k === 0) e0 = e;
+      if(e > 0.5) fl++;
+      var L = leaves[k];
+      L.style.transform = 'rotateY(' + (-180*e).toFixed(2) + 'deg)';
+      L.style.zIndex = e > 0.5 ? (10+k) : (40-k);
+      L.style.setProperty('--sh', still ? 0 : (Math.sin(Math.PI*e)*0.5).toFixed(3));
+      L.style.visibility = (single && e > 0.985) ? 'hidden' : 'visible';
+    }
+    book.style.transform = (mode === 'spread') ? 'translateX(' + (-25*(1-e0)).toFixed(2) + '%)' : '';
+    if(hint) hint.style.opacity = (1 - clamp(p/0.02,0,1)).toFixed(2);
+    if(fl !== flipsNow){ flipsNow = fl; paintNav(fl); showPages(fl); }
+    var show = y > pin.offsetTop - 10 && y < pin.offsetTop + total + stage.offsetHeight*0.3;
+    nav.style.opacity = show ? 1 : 0; nav.style.pointerEvents = show ? 'auto' : 'none';
+  }
+
+  /* ---- Relayout (carga, giro de pantalla, cambio de tamaño) ---- */
+  function relayout(force){
+    var W = window.innerWidth, H = window.innerHeight;
+    var m = (W >= 900 && W/H >= 1.15 && H >= 540) ? 'spread' : 'single';
+    if(!force && m === mode && W === W0 && Math.abs(H - H0) < 150) return;
+    var y = window.pageYOffset, hadMode = !!mode;
+    var oldTop = pin.offsetTop, oldTotal = hadMode ? totalScroll() : 0;
+    var frac = (hadMode && oldTotal > 0) ? (y - oldTop)/oldTotal : 0;
+    var past = hadMode ? y - (oldTop + oldTotal) : 0;
+    mode = m; W0 = W; H0 = H;
+    body.classList.toggle('spread', m === 'spread'); body.classList.toggle('single', m === 'single');
+    sizes(m, W, H); build(m); buildNav(); fit();
+    var nt = totalScroll();
+    if(hadMode){
+      if(frac <= 1 && frac >= 0) window.scrollTo(0, pin.offsetTop + frac*nt);
+      else if(frac > 1) window.scrollTo(0, pin.offsetTop + nt + Math.max(0,past));
+    }
+    update();
+  }
+  var rs;
+  window.addEventListener('resize', function(){ clearTimeout(rs); rs = setTimeout(function(){ relayout(false); }, 120); });
+  window.addEventListener('orientationchange', function(){ setTimeout(function(){ relayout(false); }, 250); });
+  var tick = false;
+  window.addEventListener('scroll', function(){ if(!tick){ tick = true; requestAnimationFrame(function(){ tick = false; update(); }); } }, {passive:true});
+  if(reduce.addEventListener) reduce.addEventListener('change', function(){ update(); });
+  relayout(true);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fit(); });
+
+  /* Gesto lateral y teclado */
+  var sx = 0, sy = 0;
+  stage.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, {passive:true});
+  stage.addEventListener('touchend', function(e){
+    var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if(e.target.closest && e.target.closest('.rvs')) return;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)*1.6) step(dx < 0 ? 1 : -1);
+  }, {passive:true});
+  document.addEventListener('keydown', function(e){
+    if(e.altKey || e.ctrlKey || e.metaKey) return;
+    var tg = e.target && e.target.tagName; if(tg === 'INPUT' || tg === 'TEXTAREA') return;
+    if(nav.style.pointerEvents === 'none') return;
+    if(e.target.closest && e.target.closest('.rvs')) return;
+    if(e.key === 'ArrowRight'){ e.preventDefault(); step(1); }
+    else if(e.key === 'ArrowLeft'){ e.preventDefault(); step(-1); }
+  });
+
+  /* Carrusel de reseñas */
+  (function(){
+    var rv = document.getElementById('rvs'); if(!rv) return;
+    var track = document.getElementById('rvs-track'), slides = track.children, dots = rv.querySelectorAll('.rv-d'), cur = 0, n = slides.length;
+    function go(i){
+      cur = (i + n) % n; track.style.transform = 'translateX(' + (-100*cur) + '%)';
+      for(var k=0;k<n;k++){ slides[k].setAttribute('aria-hidden', k===cur ? 'false' : 'true'); if(dots[k]){ if(k===cur) dots[k].setAttribute('aria-current','true'); else dots[k].removeAttribute('aria-current'); } }
+    }
+    document.getElementById('rv-prev').addEventListener('click', function(){ go(cur-1); });
+    document.getElementById('rv-next').addEventListener('click', function(){ go(cur+1); });
+    dots.forEach(function(d,k){ d.addEventListener('click', function(){ go(k); }); });
+    rv.addEventListener('keydown', function(e){
+      if(e.key === 'ArrowLeft'){ e.preventDefault(); e.stopPropagation(); go(cur-1); }
+      else if(e.key === 'ArrowRight'){ e.preventDefault(); e.stopPropagation(); go(cur+1); }
+    });
+    var sx = 0, sy = 0, down = false, view = rv.querySelector('.rvs-view');
+    view.addEventListener('pointerdown', function(e){ down = true; sx = e.clientX; sy = e.clientY; });
+    view.addEventListener('pointerup', function(e){ if(!down) return; down = false; var dx = e.clientX - sx, dy = e.clientY - sy; if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? cur+1 : cur-1); });
+    view.addEventListener('pointercancel', function(){ down = false; });
+    go(0);
+  })();
+
+  /* Preguntas: una abierta a la vez, apertura suave */
+  var qas = document.querySelectorAll('.qa');
+  qas.forEach(function(qa){
+    qa.querySelector('button').addEventListener('click', function(){
+      var willOpen = !qa.classList.contains('open');
+      qas.forEach(function(o){ o.classList.remove('open'); o.querySelector('button').setAttribute('aria-expanded','false'); });
+      if(willOpen){ qa.classList.add('open'); qa.querySelector('button').setAttribute('aria-expanded','true'); }
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  var bk = document.getElementById('bk'), st = document.getElementById('sh-stage'), per = document.getElementById('sh-persp');
+  if(!bk) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ry = -26, base = -26, drag = false, sx = 0, r0 = 0, back = false, vis = false, t0 = performance.now();
+  function set(v){ ry = v; bk.style.setProperty('--ry', v.toFixed(1)+'deg'); }
+  function loop(now){
+    if(vis && !drag && !back && !reduce) set(base + Math.sin((now - t0)/1500)*7);
+    requestAnimationFrame(loop);
+  }
+  if('IntersectionObserver' in window) new IntersectionObserver(function(e){ vis = e[0].isIntersecting; }).observe(st); else vis = true;
+  requestAnimationFrame(loop);
+  per.addEventListener('pointerdown', function(e){ drag = true; sx = e.clientX; r0 = ry; bk.classList.remove('snap'); try{ per.setPointerCapture(e.pointerId); }catch(_){} });
+  per.addEventListener('pointermove', function(e){ if(drag){ set(r0 + (e.clientX - sx)*0.55); } });
+  function end(){ if(!drag) return; drag = false;
+    var f = -26 + 360*Math.round((ry+26)/360), b = 154 + 360*Math.round((ry-154)/360);
+    back = Math.abs(ry-b) < Math.abs(ry-f); base = back ? b : f; bk.classList.add('snap'); set(base); syncBtn(); }
+  per.addEventListener('pointerup', end); per.addEventListener('pointercancel', end);
+  var btn = document.getElementById('sh-flip');
+  function syncBtn(){ btn.textContent = back ? 'Ver portada' : 'Ver contraportada'; btn.setAttribute('aria-pressed', back ? 'true' : 'false'); }
+  function flip(){ back = !back; bk.classList.add('snap'); base = back ? 154 : -26; set(base); syncBtn(); }
+  btn.addEventListener('click', flip);
+  st.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowRight'){ e.preventDefault(); back = !back; bk.classList.add('snap'); base = back ? 154 : -26; set(base); syncBtn(); }
+  });
+  window.shopSpin = function(){ if(reduce) return; bk.classList.remove('snap'); set(160); void bk.offsetWidth; bk.classList.add('snap'); base = -26; set(-26); };
+  document.getElementById('sh-buy').addEventListener('click', function(e){ if(window.openCheckout) window.openCheckout(e); else e.preventDefault(); });
+})();
+</script>
+<script>
+(function(){
+  var co = document.getElementById('co'); if(!co) return;
+  var dlg = co.querySelector('.co-dlg'), f = document.getElementById('co-f'), em = document.getElementById('co-em');
+  var ck = document.getElementById('co-ck'), e1 = document.getElementById('co-e1'), e2 = document.getElementById('co-e2');
+  var note = document.getElementById('co-note'), pay = document.getElementById('co-pay'), pt = document.getElementById('co-pt');
+  var form = document.getElementById('co-form'), ok = document.getElementById('co-ok'), last = null, busy = false;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var NOTES = {
+    card: 'Los datos de la tarjeta se escriben en la ventana segura de la plataforma de pago, nunca en esta web.<div class="sk" aria-hidden="true"><i></i><i></i><i></i></div>',
+    paypal: 'Te llevaremos a PayPal para confirmar el pago con tu cuenta.',
+    bizum: 'Confirmarás el pago desde la app de tu banco, con tu número de móvil.',
+    apple: 'Pagarás con Face ID o Touch ID, desde Safari en un dispositivo Apple.',
+    google: 'Pagarás con la tarjeta guardada en tu cuenta de Google.'
+  };
+  function setNote(){ var v = f.querySelector('input[name="pm"]:checked').value; note.innerHTML = NOTES[v]; }
+  f.querySelectorAll('input[name="pm"]').forEach(function(r){ r.addEventListener('change', setNote); });
+  function focusables(){ return Array.prototype.slice.call(dlg.querySelectorAll('button,input,a[href]')).filter(function(e){ return !e.disabled && e.offsetParent !== null; }); }
+  function open(){
+    last = document.activeElement; setNote(); e1.textContent = ''; e2.textContent = ''; em.removeAttribute('aria-invalid');
+    form.hidden = false; ok.hidden = true; co.classList.remove('done'); pt.textContent = 'Pagar 19 €'; pay.disabled = false; busy = false;
+    co.hidden = false; document.body.style.overflow = 'hidden';
+    requestAnimationFrame(function(){ co.classList.add('on'); }); setTimeout(function(){ em.focus(); }, reduce ? 0 : 350);
+  }
+  function close(){
+    if(busy) return; co.classList.remove('on'); document.body.style.overflow = '';
+    setTimeout(function(){ co.hidden = true; if(last && last.focus) last.focus(); }, reduce ? 0 : 400);
+  }
+  window.openCheckout = function(e){ if(e) e.preventDefault(); open(); };
+  co.addEventListener('click', function(e){ if(e.target.closest('[data-close]')) close(); });
+  document.addEventListener('keydown', function(e){
+    if(co.hidden) return;
+    if(e.key === 'Escape'){ close(); }
+    else if(e.key === 'Tab'){
+      var els = focusables(); if(!els.length) return;
+      var a = els[0], z = els[els.length-1];
+      if(e.shiftKey && (document.activeElement === a || document.activeElement === dlg)){ e.preventDefault(); z.focus(); }
+      else if(!e.shiftKey && document.activeElement === z){ e.preventDefault(); a.focus(); }
+    }
+  });
+  f.addEventListener('submit', function(e){
+    e.preventDefault(); if(busy) return;
+    var v = em.value.trim(), good = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v), bad = false;
+    e1.textContent = ''; e2.textContent = ''; em.removeAttribute('aria-invalid');
+    if(!good){ e1.textContent = v ? 'Revisa el email: parece que falta algo.' : 'Escribe tu email para recibir el acceso.'; em.setAttribute('aria-invalid','true'); em.focus(); bad = true; }
+    if(!ck.checked){ e2.textContent = 'Marca la casilla para continuar.'; if(!bad) ck.focus(); bad = true; }
+    if(bad) return;
+    busy = true; pay.disabled = true; pt.innerHTML = '<span class="co-sp" aria-hidden="true"></span> Procesando…';
+    setTimeout(function(){
+      busy = false; form.hidden = true; ok.hidden = false; co.classList.add('done');
+      document.getElementById('co-okp').textContent = 'Hemos enviado el acceso a ' + v + '.';
+      dlg.scrollTop = 0; document.getElementById('co-okt').focus();
+    }, reduce ? 300 : 1500);
+  });
+})();
+(function(){
+  var shop = document.querySelector('.shop'); if(!shop) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var L = [['.sh-eyebrow',0],['#sh-h',.06],['.sh-stage',.16],['.sh-panel',.32],['.sh-steps',.5]];
+  L.forEach(function(p){ var el = shop.querySelector(p[0]); if(el){ el.classList.add('e'); el.style.setProperty('--ed', p[1]+'s'); } });
+  var done = false;
+  window.shopEnter = function(){
+    if(done) return; done = true; shop.classList.remove('pre');
+    if(window.shopSpin) window.shopSpin();
+  };
+  if(!reduce){
+    shop.classList.add('pre');
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(en, ob){ if(en[0].isIntersecting){ window.shopEnter(); ob.disconnect(); } }, {threshold:.22}).observe(shop);
+    } else window.shopEnter();
+  }
+})();
+
+(function(){
+  var shop = document.getElementById('tienda'), veil = document.getElementById('veil'); if(!shop || !veil) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches, busy = false;
+  document.addEventListener('click', function(e){
+    var a = e.target.closest && e.target.closest('a[href="#tienda"]'); if(!a || a.id === 'hdr-cta') return;
+    e.preventDefault(); if(busy) return;
+    if(reduce){ window.scrollTo(0, shop.getBoundingClientRect().top + window.pageYOffset); if(window.shopEnter) window.shopEnter(); return; }
+    busy = true; document.body.classList.add('leaving'); veil.classList.add('on');
+    setTimeout(function(){
+      window.scrollTo(0, shop.getBoundingClientRect().top + window.pageYOffset - 0);
+      document.body.classList.remove('leaving');
+      setTimeout(function(){ veil.classList.remove('on'); if(window.shopEnter) window.shopEnter(); busy = false; }, 280);
+    }, 1050);
+  });
+})();
+</script>
+</body>
+</html>
