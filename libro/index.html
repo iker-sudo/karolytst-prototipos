@@ -426,6 +426,12 @@ footer p{width:min(60em,92vw);margin:.4em auto;text-align:center}
 body.leaving .stage{transform:scale(.96);opacity:.3;transition:transform .7s ease,opacity .7s ease}
 @media (prefers-reduced-motion:reduce){.veil,.veil .vl,.veil .vl i{transition:none}}
 
+
+/* El libro 3D no se puede seleccionar, para poder girarlo con el dedo o el ratón */
+#sh-stage,#sh-stage *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+#sh-persp{touch-action:pan-y;cursor:grab}
+#sh-persp:active{cursor:grabbing}
+#sh-stage img,#sh-stage svg{-webkit-user-drag:none;user-drag:none}
 </style>
 </head>
 <body>
@@ -1133,6 +1139,11 @@ body.leaving .stage{transform:scale(.96);opacity:.3;transition:transform .7s eas
     }, 1050);
   });
 })();
+</script>
+
+<script>
+(function(){var p=document.getElementById('sh-persp');if(!p)return;['selectstart','dragstart','contextmenu'].forEach(function(t){p.addEventListener(t,function(e){if(t!=='contextmenu'||e.pointerType==='touch')e.preventDefault()})});
+p.addEventListener('pointerdown',function(){var s=window.getSelection&&window.getSelection();if(s&&s.removeAllRanges)s.removeAllRanges()})})();
 </script>
 </body>
 </html>
