@@ -90,12 +90,18 @@ footer{padding:36px 0 52px;font-size:.82rem;color:var(--gris);border-top:1px sol
 @media (max-width:640px){header.top .wrap{min-height:56px}header nav a:nth-child(n+3){display:none}header nav a{font-size:.85rem}}
 @media (max-width:520px){.car{grid-template-columns:repeat(2,1fr)}.seg button{padding:0 .85rem}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card .th img,.car img{transition:none}}
+.prods{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:1.6rem}
+.prods a{text-decoration:none;display:block}
+.prods img{width:100%;aspect-ratio:1/1.414;object-fit:cover;object-position:top;display:block;border:1px solid var(--linea);box-shadow:0 18px 30px -22px rgba(60,40,10,.6);transition:transform .4s}
+.prods a:hover img{transform:translateY(-4px)}
+.prods span{display:block;margin-top:.6rem;font:500 1.15rem var(--serif)}.prods small{display:block;font:300 .8rem var(--sans);color:var(--gris)}
+@media (max-width:640px){.prods{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <a class="logo" href="#inicio" aria-label="KarolyTST, inicio"><img src="media/logo-mark.png" alt="" width="40" height="37">Karoly<span>TST</span></a>
-  <nav aria-label="Secciones"><a href="#prototipos">Prototipos</a><a href="#vista">Vista previa</a><a href="#instagram">Instagram</a><a href="#pendiente">Pendiente</a></nav>
+  <nav aria-label="Secciones"><a href="#prototipos">Prototipos</a><a href="#vista">Vista previa</a><a href="#productos">Productos</a><a href="#instagram">Instagram</a><a href="#pendiente">Pendiente</a></nav>
 </div></header>
 
 <main id="inicio">
@@ -143,6 +149,19 @@ footer{padding:36px 0 52px;font-size:.82rem;color:var(--gris);border-top:1px sol
     <div class="vstage" id="vstage"><div class="vfit" id="vfit"><div class="vframe" id="vframe"><iframe id="vif" title="Vista previa del prototipo" src="libro/" loading="lazy"></iframe></div></div></div>
     <p class="vhelp">Es la web real dentro de un marco: puedes hacer scroll, pulsar y probar la compra. Con el libro, desliza hacia abajo para pasar las páginas.</p>
   </div>
+</div></section>
+
+<section id="productos"><div class="wrap">
+  <span class="eyebrow">Los productos</span>
+  <h2>Así quedan <em>los productos</em> que se venden</h2>
+  <p class="mp" style="margin-top:1rem">Los archivos reales que ha enviado Karol, página por página: libro, cuaderno, guía visual, guía gratuita, fondo de móvil y los guiones de los audios.</p>
+  <div class="prods">
+    <a href="productos/"><img src="productos/p/libro-01.jpg" alt="Portada del libro Salir del Modo Supervivencia" loading="lazy"><span>Libro<small>59 págs</small></span></a>
+    <a href="productos/"><img src="productos/p/cua-a-01.jpg" alt="Portada del cuaderno 21 Días Ocupando tu Lugar" loading="lazy"><span>Cuaderno<small>32 págs</small></span></a>
+    <a href="productos/"><img src="productos/p/guia-01.jpg" alt="Portada de la guía visual" loading="lazy"><span>Guía visual<small>20 págs</small></span></a>
+    <a href="productos/"><img src="productos/p/gratis-1.jpg" alt="Portada de la guía gratuita" loading="lazy"><span>Guía gratuita<small>8 págs</small></span></a>
+  </div>
+  <p style="margin-top:1.6rem"><a class="btn" href="productos/">Ver todos los productos</a></p>
 </div></section>
 
 <section class="alt" id="instagram"><div class="wrap">

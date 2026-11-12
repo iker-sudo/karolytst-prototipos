@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Productos finales · KarolyTST</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--crema:#FDFBF7;--crema-2:#F5F0E6;--mesa:#EFE8D8;--grafito:#2B2B2B;--gris:#6B655B;--oro:#C5A059;--oro-osc:#8A6B2A;--linea:#E4DCCB;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Jost","Helvetica Neue",Arial,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--crema);color:var(--grafito);font:300 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+a:focus-visible,button:focus-visible{outline:2px solid var(--grafito);outline-offset:3px}
+.wrap{width:min(1180px,100% - 32px);margin-inline:auto}
+header{border-bottom:1px solid var(--linea)}
+header .wrap{display:flex;align-items:center;gap:14px;min-height:72px}
+header img{height:50px;width:auto;display:block}
+header b{font:600 1.5rem var(--serif);letter-spacing:.02em}header b span{color:var(--oro-osc)}
+.top{padding:clamp(36px,6vw,72px) 0 12px}
+.eyebrow{font-size:.76rem;letter-spacing:.24em;text-transform:uppercase;color:var(--oro-osc);font-weight:500;display:block;margin-bottom:.9rem}
+h1{font:500 clamp(2.2rem,5vw,3.8rem)/1.06 var(--serif);text-wrap:balance}
+h1 em{font-style:italic;color:var(--oro-osc)}
+.lead{max-width:40em;color:var(--gris);margin-top:1rem}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,3vw,34px);padding:34px 0 80px}
+.card{display:flex;flex-direction:column;background:#fff;border:1px solid var(--linea);text-align:left;padding:0;transition:transform .35s,box-shadow .35s}
+.card:hover{transform:translateY(-4px);box-shadow:0 30px 44px -34px rgba(60,40,10,.6)}
+.cv{background:radial-gradient(ellipse at 50% 40%,#F6F1E4,var(--mesa) 78%);aspect-ratio:1/1.05;display:grid;place-items:center;padding:22px;overflow:hidden}
+.cv img.pg{height:100%;width:auto;max-width:100%;object-fit:contain;box-shadow:0 18px 30px -14px rgba(40,28,8,.55),0 2px 6px rgba(40,28,8,.2);background:#fff}
+.cv .ph{height:100%;aspect-ratio:9/19;border-radius:22px;border:6px solid #1b1b1b;overflow:hidden;box-shadow:0 18px 30px -14px rgba(40,28,8,.6)}
+.cv .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.cv .au{width:78%;aspect-ratio:1/1.3;background:#2B2B2B;color:#F3EBDA;border-radius:4px 10px 10px 4px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 18px 30px -14px rgba(40,28,8,.55)}
+.au small{letter-spacing:.2em;font-size:.62rem;text-transform:uppercase;color:var(--oro)}
+.au strong{font:500 1.35rem/1.1 var(--serif)}
+.au i{display:flex;gap:3px;align-items:flex-end;height:34px}.au i s{flex:1;background:var(--oro);opacity:.85;border-radius:2px}
+.bd{padding:18px 20px 22px;display:flex;flex-direction:column;gap:.5rem;flex:1}
+.bd h2{font:500 1.55rem/1.1 var(--serif)}
+.bd p{color:var(--gris);font-size:.95rem}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:.4rem}
+.tags span{font-size:.72rem;border:1px solid var(--linea);border-radius:99px;padding:.1rem .65rem;color:var(--gris)}
+.tags span.ok{border-color:var(--oro);color:var(--oro-osc)}
+.tags span.warn{background:#FBF0D9;border-color:#E9CE90;color:#7A5A12}
+.open{margin-top:.5rem;color:var(--oro-osc);font-weight:500;font-size:.92rem}
+footer{border-top:1px solid var(--linea);padding:28px 0 48px;font-size:.84rem;color:var(--gris)}
+/* lector */
+.rd{position:fixed;inset:0;z-index:50;background:#1d1b17;color:#F3EBDA;display:none;flex-direction:column}
+.rd.on{display:flex}
+.rb{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #3a352b;min-height:56px}
+.rb h3{font:500 1.15rem var(--serif);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb .n{font-size:.9rem;color:#cdbf9f;white-space:nowrap}
+.rb button{min-height:44px;min-width:44px;background:transparent;border:1px solid #4a4436;color:#F3EBDA;border-radius:6px;padding:0 12px}
+.rb button:hover{background:#2c2820}
+.rm{flex:1;min-height:0;display:flex}
+.th{width:132px;flex:none;overflow:auto;padding:10px;border-right:1px solid #3a352b;display:flex;flex-direction:column;gap:10px}
+.th button{padding:0;border:2px solid transparent;background:#fff;line-height:0;position:relative;border-radius:2px;flex:none}
+.th button[aria-current="true"]{border-color:var(--oro)}
+.th img{width:100%;height:auto;display:block}
+.th b{position:absolute;left:3px;bottom:3px;background:rgba(29,27,23,.8);color:#F3EBDA;font:400 .68rem var(--sans);padding:1px 5px;border-radius:3px}
+.st{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;padding:14px;overflow:auto;touch-action:pan-y}
+.st img{max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;background:#fff;box-shadow:0 20px 50px -10px rgba(0,0,0,.6)}
+.st.zoom{align-items:flex-start;justify-content:flex-start}.st.zoom img{max-width:none;max-height:none;width:min(1500px,230%)}
+.ar{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:64px;background:rgba(29,27,23,.75);border:1px solid #4a4436;color:#F3EBDA;font-size:1.5rem;border-radius:6px;z-index:2}
+.ar.l{left:10px}.ar.r{right:10px}.ar:disabled{opacity:.25;cursor:default}
+.tx{flex:1;overflow:auto;padding:24px 16px 60px}
+.tx article{max-width:42em;margin:0 auto}
+.tx h4{font:500 1.9rem/1.1 var(--serif);margin:2.2rem 0 .4rem;color:#fff}
+.tx h4:first-child{margin-top:0}
+.tx .w{color:var(--oro);font-size:.85rem;margin-bottom:1rem}
+.tx p{margin:0 0 .9rem;color:#EADFC8}
+.tx p.pz{color:var(--oro);font-size:.85rem;font-style:italic}
+@media (max-width:860px){.grid{grid-template-columns:1fr 1fr}.th{display:none}}
+@media (max-width:560px){.grid{grid-template-columns:1fr}.ar{width:40px;height:56px}.rb h3{display:none}.rb .n{flex:1;text-align:center}.rb button{white-space:nowrap}}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><img src="logo_mark.png" alt="Logotipo KarolyTST"><b>Karoly<span>TST</span></b><a href="../" style="margin-left:auto;color:var(--oro-osc);text-decoration:none;font-size:.92rem;min-height:44px;display:inline-flex;align-items:center">← Volver al inicio</a></div></header>
+<main>
+<div class="top wrap">
+  <span class="eyebrow">Productos finales</span>
+  <h1>Así quedan <em>los productos</em> que se venden</h1>
+  <p class="lead">Son los archivos reales que ha enviado Karol, página por página. Pulsa cualquiera para leerlo como lo recibirá la compradora. Son solo para revisión: no se pueden descargar desde aquí.</p>
+</div>
+<div class="wrap grid" id="grid"></div>
+</main>
+<footer><div class="wrap">Vista de revisión. Las páginas son las de los PDF enviados el 12 de noviembre, sin cambios. Los audios son el guion; aún no están grabados.</div></footer>
+
+<div class="rd" id="rd" role="dialog" aria-modal="true" aria-labelledby="rd-t">
+  <div class="rb"><button id="rd-x" aria-label="Cerrar">✕ Cerrar</button><h3 id="rd-t"></h3><span class="n" id="rd-n"></span><button id="rd-z" aria-pressed="false">Ampliar</button></div>
+  <div class="rm" id="rm"><div class="th" id="th"></div><div class="st" id="st"><button class="ar l" id="rd-p" aria-label="Página anterior">‹</button><img id="rd-i" alt=""><button class="ar r" id="rd-nx" aria-label="Página siguiente">›</button></div><div class="tx" id="tx" hidden></div></div>
+</div>
+
+<script>
+var D={"libro": ["libro-01.jpg", "libro-02.jpg", "libro-03.jpg", "libro-04.jpg", "libro-05.jpg", "libro-06.jpg", "libro-07.jpg", "libro-08.jpg", "libro-09.jpg", "libro-10.jpg", "libro-11.jpg", "libro-12.jpg", "libro-13.jpg", "libro-14.jpg", "libro-15.jpg", "libro-16.jpg", "libro-17.jpg", "libro-18.jpg", "libro-19.jpg", "libro-20.jpg", "libro-21.jpg", "libro-22.jpg", "libro-23.jpg", "libro-24.jpg", "libro-25.jpg", "libro-26.jpg", "libro-27.jpg", "libro-28.jpg", "libro-29.jpg", "libro-30.jpg", "libro-31.jpg", "libro-32.jpg", "libro-33.jpg", "libro-34.jpg", "libro-35.jpg", "libro-36.jpg", "libro-37.jpg", "libro-38.jpg", "libro-39.jpg", "libro-40.jpg", "libro-41.jpg", "libro-42.jpg", "libro-43.jpg", "libro-44.jpg", "libro-45.jpg", "libro-46.jpg", "libro-47.jpg", "libro-48.jpg", "libro-49.jpg", "libro-50.jpg", "libro-51.jpg", "libro-52.jpg", "libro-53.jpg", "libro-54.jpg", "libro-55.jpg", "libro-56.jpg", "libro-57.jpg", "libro-58.jpg", "libro-59.jpg"], "cua": ["cua-a-01.jpg", "cua-a-02.jpg", "cua-a-03.jpg", "cua-a-04.jpg", "cua-a-05.jpg", "cua-a-06.jpg", "cua-a-07.jpg", "cua-a-08.jpg", "cua-a-09.jpg", "cua-a-10.jpg", "cua-a-11.jpg", "cua-a-12.jpg", "cua-a-13.jpg", "cua-b-01.jpg", "cua-b-02.jpg", "cua-b-03.jpg", "cua-b-04.jpg", "cua-b-05.jpg", "cua-b-06.jpg", "cua-b-07.jpg", "cua-b-08.jpg", "cua-b-09.jpg", "cua-c-01.jpg", "cua-c-02.jpg", "cua-c-03.jpg", "cua-c-04.jpg", "cua-c-05.jpg", "cua-c-06.jpg", "cua-c-07.jpg", "cua-c-08.jpg", "cua-c-09.jpg", "cua-c-10.jpg"], "guia": ["guia-01.jpg", "guia-02.jpg", "guia-03.jpg", "guia-04.jpg", "guia-05.jpg", "guia-06.jpg", "guia-07.jpg", "guia-08.jpg", "guia-09.jpg", "guia-10.jpg", "guia-11.jpg", "guia-12.jpg", "guia-13.jpg", "guia-14.jpg", "guia-15.jpg", "guia-16.jpg", "guia-17.jpg", "guia-18.jpg", "guia-19.jpg", "guia-20.jpg"], "gratis": ["gratis-1.jpg", "gratis-2.jpg", "gratis-3.jpg", "gratis-4.jpg", "gratis-5.jpg", "gratis-6.jpg", "gratis-7.jpg", "gratis-8.jpg"], "aud": [{"t": "AUDIO 1: Desactivar la Alerta (Regulación Corporal y Presente)", "when": "Cuándo escucharlo: Cuando sientas prisa mental, exigencia, culpa por descansar o la sensación de que tienes que sostener el mundo de todos.", "body": ["[Inicio de grabación]", "Hola, soy Carolina. Bienvenida a este espacio de pausa de KarolyTST.", "Si te has puesto este audio ahora mismo, es muy probable que tu cabeza vaya a mil por hora, que sientas peso en los hombros o esa urgencia en el pecho que te dice que tienes que seguir resolviendo cosas.", "No intentes pelearte con tus pensamientos ni obligarte a poner la mente en blanco. Hoy vamos a ir por un camino mucho más rápido y real: vamos a hablarle directamente a tu cuerpo para que entienda que, en este minuto, estás a salvo.", "[Pausa de 3 segundos]", "Primero, estén donde estén tus pies ahora mismo, descruza las piernas y apoya bien las dos plantas en el suelo. No cierres los ojos todavía. Con los ojos abiertos, gira despacio el cuello hacia la derecha y luego hacia la izquierda, mirando el lugar físico en el que estás ahora mismo. Fíjate en tres objetos reales que tengas delante: una pared, una ventana, una mesa... Nómbralos mentalmente. Este gesto tan sencillo le envía un mensaje directo a tu sistema nervioso: «Mira a tu alrededor; aquí y ahora no hay ninguna emergencia».", "[Pausa de 3 segundos]", "Ahora sí, si te resulta cómodo, deja que tus párpados caigan suavemente o mantén la mirada baja en un punto fijo.", "Vamos a quitarle el freno de mano a tu cuerpo en tres puntos concretos: Primero, lleva la atención a tu boca. Separa ligeramente los dientes de arriba de los de abajo y deja que la lengua descanse ancha y suelta en la base de la boca. Nota cómo al soltar la mandíbula, se afloja también la nuca. Segundo, sube un instante los hombros hacia las orejas... y déjalos caer de golpe al soltar el aire. Hazlo una vez más: sube... y suelta el peso. Tercero, lleva tu mano derecha al centro de tu pecho y tu mano izquierda a la tripita. Siente el calor de tus propias manos sosteniéndote.", "[Pausa de 4 segundos]", "Desde ahí, vamos a hacer tres respiraciones con freno. Toma aire por la nariz contando hasta cuatro: uno, dos, tres, cuatro... y suéltalo muy despacio por la boca, como si soplaras por una pajita fina, vaciándote del todo: uno, dos, tres, cuatro, cinco, seis. Otra vez. Inspira por la nariz... y suelta largo y lento por la boca, dejando que los hombros bajen un centímetro más.", "[Pausa de 4 segundos]", "Escucha bien esto mientras sientes tu mano en el pecho: Esa prisa, esa exigencia o esa culpa que sientes no son un mandato real; son solo una alarma antigua de tu cuerpo que aprendió que para estar segura tenías que poder con todo. Agradécele a tu cuerpo que haya querido protegerte, pero dile internamente con tu voz de mujer adulta:", "«Aquello ya pasó. Hoy soy adulta, tengo mis propios recursos y el mundo no se cae si suelto el volante diez minutos. En este momento, no tengo que salvar a nadie».", "[Pausa de 5 segundos]", "Quédate un instante sintiendo el peso de tus pies en el suelo y el latido debajo de tu mano. Recupera tu tamaño real. Solo te toca sostener tu propio cuerpo en este minuto.", "Toma una última respiración profunda, mueve suavemente los dedos de las manos y, cuando quieras, vuelve a abrir los ojos. Camina el resto del día un poquito más despacio.", "[Fin de grabación]"]}, {"t": "AUDIO 2: El Movimiento de La Devolución (Orden Sistémico y Honra)", "when": "Cuándo escucharlo: Cuando sientas que estás cargando con preocupaciones, tristezas o problemas de tus padres, tu familia de origen o tus antepasados.", "body": ["[Inicio de grabación]", "Hola, soy Carolina. En este audio de KarolyTST vamos a realizar juntas el movimiento interno de La Devolución.", "Te recomiendo hacer este ejercicio sentada con la espalda apoyada o de pie, con los pies bien firmes en el suelo. Cierra suavemente los ojos y suelta el aire por la boca con un suspiro largo.", "[Pausa de 3 segundos]", "Muchas veces, por un amor profundo pero desordenado, vamos por la vida llevando en nuestros brazos maletas que no son nuestras: la tristeza de nuestra madre, los silencios o preocupaciones de nuestro padre, la escasez de nuestros abuelos o los conflictos de nuestra familia. Creemos que cargando nosotras con eso les hacemos la vida más ligera. Pero la realidad es que llevar su peso no los alivia a ellos y te deja a ti sin fuerzas para tu propia vida.", "Con la familia no se corta; el vínculo se ordena desde el respeto y la honra.", "[Pausa de 4 segundos]", "Imagina ahora que tienes entre tus manos un objeto pesado. Ponle cara y nombre a ese peso que llevas días o años sosteniendo: esa preocupación familiar, ese duelo ajeno o esa necesidad de que tus padres estén bien o cambien. Siente en tus brazos y en tu espalda lo que pesa llevar eso a cuestas.", "Ahora, imagina que a un par de metros frente a ti están tus padres (o aquellos familiares a quienes pertenece originalmente esta historia). Míralos sin juicio, sin reproches y sin lástima. Míralos como lo que son: los grandes. Los que llegaron antes que tú y vivieron lo que les tocó vivir con las herramientas que tenían en su época.", "[Pausa de 4 segundos]", "Imagina que das un paso tranquilo hacia ellos y colocas ese peso en el suelo, justo a sus pies, con muchísimo respeto. Da un paso de nuevo hacia atrás, vuelve a tu sitio de hija y deja tus manos completamente vacías y sueltas a los lados del cuerpo.", "Inclina muy levemente tu cabeza en señal de honra hacia su camino, y diles internamente con total claridad:", "«Vosotros sois los grandes y yo soy la pequeña. Respeto profundamente vuestra historia, vuestras decisiones y lo que os tocó vivir. Durante mucho tiempo llevé este peso por amor, pero no me corresponde. Hoy os lo devuelvo con honra y dignidad, porque confío en vuestra fuerza para sostener vuestro propio destino. Yo me quedo únicamente con la vida que llegó a mí a través de vosotros».", "[Pausa de 6 segundos]", "Respira hondo y nota qué pasa en tus hombros y en tus manos al dejarlas vacías. No los estás abandonando; les estás devolviendo su dignidad de adultos y estás recuperando tu lugar de hija.", "Siente la ligereza en tu pecho. Estás en tu sitio. Toma aire profundamente, suéltalo despacio y, a tu ritmo, abre los ojos.", "[Fin de grabación]"]}, {"t": "AUDIO 3: Anclaje de Fuerza Adulta (Raíz Sistémica y Dirección PNL)", "when": "Cuándo escucharlo: Justo antes de tener una conversación difícil, poner un límite sano, lanzar un proyecto, cobrar por tu trabajo o tomar una decisión importante.", "body": ["[Inicio de grabación]", "Hola, soy Carolina. Este audio de KarolyTST está diseñado para darte suelo y firmeza justo antes de dar un paso importante o mantener tu posición de adulta.", "Si puedes, haz este breve ejercicio de pie. Si estás sentada, apoya la espalda recta y las dos plantas de los pies bien planas sobre el suelo. Cierra los ojos y respira hondo llevando el aire hasta el abdomen.", "[Pausa de 3 segundos]", "Cuando vamos a poner un límite, a decir que no o a dar un paso hacia delante en nuestra vida profesional o personal, es normal que una parte antigua de nosotras se sienta pequeña, dudosa o sola. Hoy vamos a cambiar el foco: vas a dejar de ir empujando sola y vas a apoyarte en la fuerza de tus raíces.", "[Pausa de 3 segundos]", "Lleva toda tu atención a tus talones y a tu espalda. Imagina que justo detrás de ti están tus padres. Detrás de ellos, tus cuatro abuelos. Y detrás, tus ocho bisabuelos y todas las generaciones de hombres y mujeres que abrieron camino antes de que tú nacieras. No mires ahora sus heridas ni sus errores humanos; conecta únicamente con la enorme fuerza de supervivencia que tuvieron todos ellos para que la vida llegara hasta ti.", "Imagina que dejas caer el peso de tu cuerpo un milímetro hacia atrás, sobre tus talones, sintiendo cómo todas esas raíces te sostienen la espalda como el tronco firme de un árbol. No tienes que cargarlos encima; están detrás de ti, dándote respaldo.", "[Pausa de 4 segundos]", "Ahora mira hacia delante, hacia esa situación, esa conversación o ese proyecto que tienes hoy frente a ti. Endereza la columna, coloca la barbilla paralela al suelo y vamos a crear un anclaje físico para que tu cerebro recuerde esta postura:", "Une la yema del dedo pulgar y el dedo corazón de tu mano derecha (o apoya tu mano firme en el centro del pecho). Presiona suavemente mientras sientes tus pies bien clavados en la tierra y el respaldo en tu espalda.", "[Pausa de 3 segundos]", "Con ese gesto activo y respirando con amplitud, repite internamente estas palabras de dirección:", "«Vengo de una historia que supo salir adelante y esa misma fuerza está hoy en mí. Para mí es seguro ocupar mi lugar de adulta, marcar mi límite con respeto y avanzar hacia lo que elijo. Dejo de analizar de dónde vengo y decido hacia dónde voy».", "[Pausa de 5 segundos]", "Guarda esta sensación de aplomo y serenidad en tu cuerpo. Sabes que cada vez que hoy hagas este mismo gesto con tu mano y sientas tus talones en el suelo, tu cuerpo recordará al instante cuál es tu tamaño real.", "Toma una respiración profunda, suelta el gesto de tu mano, abre los ojos y ve a por tu día desde tu lugar.", "[Fin de grabación]"]}]};
+var P=[
+ {id:'libro',t:'Salir del Modo Supervivencia',s:'Libro digital',d:'11 capítulos en 4 bloques. Historias, mirada sistémica, cuerpo, práctica y frase que ordena.',pg:D.libro,tags:['PDF · 59 págs','Semanas 1, 2 y 3'],sem:[[1,20,1],[21,45,2],[46,59,3]]},
+ {id:'cua',t:'21 Días Ocupando tu Lugar',s:'Llave 1 · Cuaderno de ruta',d:'21 paradas de 5 minutos para detectar la alarma, ordenar tu lugar y trazar tu nueva ruta.',pg:D.cua,tags:['PDF · 32 págs','Semanas 1, 2 y 3'],sem:[[1,13,1],[14,22,2],[23,32,3]]},
+ {id:'aud',t:'Cuerpo en Calma, Lugar en Orden',s:'Llave 2 · 3 audios',d:'Desactivar la Alerta, El Movimiento de La Devolución y Anclaje de Fuerza Adulta.',aud:1,tags:['MP3 · 3 audios','Falta grabar'],warn:1},
+ {id:'guia',t:'Tu Mapa de Posición y Respuesta',s:'Llave 3 · Guía visual',d:'Semáforo del cuerpo, mapa de posición, La Devolución en 7 pasos y 12 tarjetas de orden.',pg:D.guia,tags:['PDF · 20 págs','Semanas 1, 2 y 3']},
+ {id:'gratis',t:'Desactivar la Alerta',s:'Guía gratuita',d:'Tus 3 primeros días para salir del modo supervivencia. Se regala a cambio del email.',pg:D.gratis,tags:['PDF · 8 págs','Captación']},
+ {id:'fondo',t:'Fondo de móvil',s:'Regalo · Ruta SOS',d:'Para · Ubica · Ordena, para tener a mano el recordatorio de 90 segundos.',img:'fondo.jpg',tags:['PNG · móvil','Semana 1']}
+];
+var g=document.getElementById('grid');
+function bars(){var h='';for(var i=0;i<24;i++)h+='<s style="height:'+(18+Math.abs(Math.sin(i*1.3))*82).toFixed(0)+'%"></s>';return h}
+P.forEach(function(p,i){
+  var cv=p.aud?'<div class="au"><small>Llave 2</small><strong>Cuerpo en calma,<br>lugar en orden</strong><i>'+bars()+'</i></div>':p.id==='fondo'?'<div class="ph"><img src="fondo.jpg" alt="Fondo de móvil Para Ubica Ordena"></div>':'<img class="pg" src="p/'+p.pg[0]+'" alt="Portada de '+p.t+'" loading="lazy">';
+  var b=document.createElement('button');b.className='card';b.type='button';b.setAttribute('data-i',i);
+  b.innerHTML='<div class="cv">'+cv+'</div><div class="bd"><span class="eyebrow" style="margin:0">'+p.s+'</span><h2>'+p.t+'</h2><p>'+p.d+'</p><div class="tags">'+p.tags.map(function(t,k){return '<span class="'+(p.warn&&k==1?'warn':'')+'">'+t+'</span>'}).join('')+'</div><span class="open">'+(p.aud?'Leer los guiones':p.id==='fondo'?'Verlo grande':'Leer página a página')+' →</span></div>';
+  b.addEventListener('click',function(){openR(i,b)});g.appendChild(b);
+});
+var rd=document.getElementById('rd'),img=document.getElementById('rd-i'),st=document.getElementById('st'),tx=document.getElementById('tx'),th=document.getElementById('th'),cur=0,pr=null,back=null,zoom=false;
+function semOf(p,n){if(!p.sem)return '';for(var k=0;k<p.sem.length;k++)if(n>=p.sem[k][0]&&n<=p.sem[k][1])return ' · Semana '+p.sem[k][2];return ''}
+function show(n){var p=pr;if(!p.pg)return;cur=Math.max(0,Math.min(p.pg.length-1,n));img.src='p/'+p.pg[cur];img.alt=p.t+', página '+(cur+1);
+ document.getElementById('rd-n').textContent='Pág. '+(cur+1)+' de '+p.pg.length+semOf(p,cur+1);
+ document.getElementById('rd-p').disabled=cur===0;document.getElementById('rd-nx').disabled=cur===p.pg.length-1;
+ [].forEach.call(th.children,function(c,i){c.setAttribute('aria-current',i===cur?'true':'false')});var c=th.children[cur];if(c&&c.scrollIntoView)c.scrollIntoView({block:'nearest'});st.scrollTo(0,0)}
+function setZ(z){zoom=z;st.classList.toggle('zoom',z);document.getElementById('rd-z').setAttribute('aria-pressed',z?'true':'false');document.getElementById('rd-z').textContent=z?'Ajustar':'Ampliar'}
+function openR(i,from){pr=P[i];back=from;document.getElementById('rd-t').textContent=pr.t;rd.classList.add('on');document.body.style.overflow='hidden';setZ(false);
+ var text=!!pr.aud;tx.hidden=!text;st.style.display=text?'none':'';th.style.display=(text||pr.id==='fondo')?'none':'';document.getElementById('rd-z').style.display=text?'none':'';
+ if(text){document.getElementById('rd-n').textContent='Guion · sin grabar';var h='<article>';D.aud.forEach(function(a){h+='<h4>'+a.t.replace(/^AUDIO \d: /,'Audio '+a.t.charAt(6)+' · ')+'</h4><div class="w">'+a.when+'</div>';a.body.forEach(function(l){h+=/^\[.*\]$/.test(l)?'<p class="pz">'+l+'</p>':'<p>'+l.replace(/\[(.*?)\]/g,'<em>[$1]</em>')+'</p>'})});tx.innerHTML=h+'</article>';tx.scrollTop=0}
+ else if(pr.id==='fondo'){img.src=pr.img;img.alt='Fondo de móvil';document.getElementById('rd-n').textContent='1080 × 2340';document.getElementById('rd-p').style.display='none';document.getElementById('rd-nx').style.display='none'}
+ else{document.getElementById('rd-p').style.display='';document.getElementById('rd-nx').style.display='';th.innerHTML='';pr.pg.forEach(function(f,k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Ir a la página '+(k+1));b.innerHTML='<img src="p/'+f+'" alt="" loading="lazy"><b>'+(k+1)+'</b>';b.addEventListener('click',function(){show(k)});th.appendChild(b)});show(0)}
+ document.getElementById('rd-x').focus()}
+function closeR(){rd.classList.remove('on');document.body.style.overflow='';if(back)back.focus()}
+document.getElementById('rd-x').addEventListener('click',closeR);
+document.getElementById('rd-p').addEventListener('click',function(){show(cur-1)});document.getElementById('rd-nx').addEventListener('click',function(){show(cur+1)});
+document.getElementById('rd-z').addEventListener('click',function(){setZ(!zoom)});
+document.addEventListener('keydown',function(e){if(!rd.classList.contains('on'))return;if(e.key==='Escape')closeR();else if(e.key==='ArrowRight'&&pr.pg)show(cur+1);else if(e.key==='ArrowLeft'&&pr.pg)show(cur-1)});
+var sx=null;st.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});st.addEventListener('touchend',function(e){if(sx===null||zoom||!pr.pg)return;var d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>60)show(cur+(d<0?1:-1));sx=null});
+</script>
+</body>
+</html>
